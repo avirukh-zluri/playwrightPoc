@@ -404,12 +404,18 @@ test("Access review" , async ({page}) => {
     const pageAccessReviews = new AccessReviewsPage(page);
 
     // Create Playbook
-    const pageWorkflows = new WorkflowPage(page);
-    await pageWorkflows.goToWorkflows();
-    await pageWorkflows.navigateWorkflowsOnboarding();
-    await pageWorkflows.createPlaybook();
+    const application = new Application(page);
+    
+    await application.goToApplication();
+    // await application.getMergedApplicationCount();
+    await application.goToAllApp();
+    await application.addPlaybookForApp({
+        name : "Asana",
+        actionName : "Create A Manual Task",
+        playbookActionName : "Delete Project"
+    });
 
-    // Create Certificate
+        // Create Certificate
     await pageAccessReviews.goToAccessReviewsOngoing();
     await setTimeout(3000);
     await pageAccessReviews.createCertificate({
@@ -422,7 +428,9 @@ test("Access review" , async ({page}) => {
     });
 
     // Delete Playbook 
-    pageWorkflows.deletePlaybook();
+    await application.deletePlaybook({
+        name:"Asana"
+    });
 
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();

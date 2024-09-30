@@ -65,6 +65,9 @@ export class AccessReviewsPage{
         this.remediationDate = `(//td[contains(@title,'${setRemediationDate}')])[3]`;
         this.clickToApply3 = "(//div[contains(text(),'Apply')])[3]";
         this.createCertificateButton = "//button[contains(@class,'sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ ht-32px create__cert__btn ht-32px create__cert__btn')]"
+
+        // validation 
+        this.clickOnReview = "//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ']";
     }
 
     async goToAccessReviewsOngoing(){
@@ -160,6 +163,12 @@ export class AccessReviewsPage{
 
         
         await this.page.locator(this.createCertificateButton).click();
+
+        // validation 
+        await this.page.getByText(this.certName).click();
+        await this.page.locator(this.clickOnReview).click();
+
+        const newElements = await this.page.locator("");
 
     }
 }
