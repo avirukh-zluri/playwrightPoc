@@ -32,7 +32,8 @@ export class Application {
         this.clickOnAdd = "//button[@class='appsad mr-3']";
         this.clickToAddAction = "(//img[@class='mr-1'])[81]";
         this.writeAction = "//input[@placeholder='Select an action']";
-        this.playbookAction = "//div[@class='z-select-selector flex-fill d-flex align-items-center flex-wrap']";
+        this.clickToAddTask = "//div[@class='z-select-option']";
+        this.playbookAction = "//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@class='container-fluid']/section/div[@class='row']/div[@class='col-md-8 d-flex flex-column pt-5 pb-10 align-items-center actions_info_card']/div[@class='d-flex flex-column align-items-center actions_container']/div[@class='d-flex flex-column']/div[@class='white-bg']/div[@class='p-4 z-w-add-action']/div/div/div[1]";
         this.clickToAddAssignee = "//input[contains(@placeholder,'Select an assignee')]";
         this.addAssignee = "//div[@class='s-menu-container shadow-sm mt-1 m-0 select-user-mt w-100']//div[1]//button[1]"; // Department Head
         this.saveTask = "//button[normalize-space()='Save Task']";
@@ -40,7 +41,7 @@ export class Application {
 
         // Delete Playbook
         this.clickOnEllipsisButton = "//div[@class='cursor-pointer']//img";
-        this.clickOnDelete1 = "//div[@class='cursor-pointer']//img";
+        this.clickOnDelete1 = "(//div[@id='0'])[1]";
         this.clickOnDelete2 = "//button[normalize-space()='Delete Playbook']";
     }
 
@@ -153,17 +154,18 @@ export class Application {
         
         // Playbook Creation 
         await this.page.locator(this.clickOnAdd).click();        
-        await setTimeout(2000);
+        await setTimeout(700);
         await this.page.locator(this.clickToAddAction).click();        
-        await setTimeout(2000);
+        await setTimeout(700);
         await this.page.locator(this.writeAction).click();
-        await setTimeout(2000);
+        await setTimeout(700);
         await this.page.locator(this.writeAction).fill(actionName);
-        await setTimeout(2000);
-        await this.page.getByText(actionName).nth(0).click();
+        await setTimeout(700);
+        await this.page.locator(this.clickToAddTask).click();
         
-        await this.page.getByText(this.playbookAction).click();
-        await this.page.getByText(this.playbookActionName).click();
+        await this.page.locator('//div[contains(@class, "z-select-selector")]', { hasText: 'Select a manual action template' }).click();       
+        await this.page.locator('//div[contains(@class , "z-select-option ")]').filter({ hasText: playbookActionName }).click();
+
         await this.page.locator(this.clickToAddAssignee).click();
         await this.page.locator(this.addAssignee).click();
         await this.page.locator(this.saveTask).click();
@@ -180,8 +182,8 @@ export class Application {
         await this.page.locator(this.clickOnAutomation).click();
         await this.page.locator(this.clickOnDeprovisioning).click();
 
-        await this.page.locator(this.clickOnEllipsisButton).click();
-        await this.page.locator(this.clickOnDelete1).click();
+        await this.page.locator(this.clickOnEllipsisButton).nth(0).click();
+        await this.page.locator(this.clickOnDelete1).nth(0).click();
         await this.page.locator(this.clickOnDelete2).click();
     }
 }

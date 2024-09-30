@@ -412,7 +412,7 @@ test("Access review" , async ({page}) => {
     await application.addPlaybookForApp({
         name : "Asana",
         actionName : "Create A Manual Task",
-        playbookActionName : "Delete Project"
+        playbookActionName : "Add a user to application"
     });
 
         // Create Certificate
@@ -426,11 +426,21 @@ test("Access review" , async ({page}) => {
         secondaryReviewer: "keerthy",
         appName: "Asana"
     });
-
+    await setTimeout(2000);
     // Delete Playbook 
+    await application.goToApplication();
+    await application.goToAllApp();
+
     await application.deletePlaybook({
         name:"Asana"
     });
+    
+    // await pageAccessReviews.goToAccessReviewsOngoing();
+    // await setTimeout(5000);
+    // await pageAccessReviews.certValidation({
+    //     certName:"Demo Certificate 1"
+    // });
+    // await pageAccessReviews.archieveCert();
 
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();
