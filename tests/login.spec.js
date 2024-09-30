@@ -404,12 +404,18 @@ test("Access review" , async ({page}) => {
     const pageAccessReviews = new AccessReviewsPage(page);
 
     // Create Playbook
-    const pageWorkflows = new WorkflowPage(page);
-    await pageWorkflows.goToWorkflows();
-    await pageWorkflows.navigateWorkflowsOnboarding();
-    await pageWorkflows.createPlaybook();
+    const application = new Application(page);
+    
+    await application.goToApplication();
+    // await application.getMergedApplicationCount();
+    await application.goToAllApp();
+    await application.addPlaybookForApp({
+        name : "Asana",
+        actionName : "Create A Manual Task",
+        playbookActionName : "Add a user to application"
+    });
 
-    // Create Certificate
+        // Create Certificate
     await pageAccessReviews.goToAccessReviewsOngoing();
     await setTimeout(3000);
     await pageAccessReviews.createCertificate({
@@ -420,9 +426,21 @@ test("Access review" , async ({page}) => {
         secondaryReviewer: "keerthy",
         appName: "Asana"
     });
-
+    await setTimeout(2000);
     // Delete Playbook 
-    pageWorkflows.deletePlaybook();
+    await application.goToApplication();
+    await application.goToAllApp();
+
+    await application.deletePlaybook({
+        name:"Asana"
+    });
+    
+    // await pageAccessReviews.goToAccessReviewsOngoing();
+    // await setTimeout(5000);
+    // await pageAccessReviews.certValidation({
+    //     certName:"Demo Certificate 1"
+    // });
+    // await pageAccessReviews.archieveCert();
 
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();

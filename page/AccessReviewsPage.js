@@ -65,6 +65,14 @@ export class AccessReviewsPage{
         this.remediationDate = `(//td[contains(@title,'${setRemediationDate}')])[3]`;
         this.clickToApply3 = "(//div[contains(text(),'Apply')])[3]";
         this.createCertificateButton = "//button[contains(@class,'sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ ht-32px create__cert__btn ht-32px create__cert__btn')]"
+
+        // validation 
+        this.clickOnReview = "//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ']";
+
+        // Archieve Certificate 
+        this.clickOnEllipsis = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/button[1]/img[1]";
+        this.clickOnArchieve = "//div[contains(@class,'menu-options-container')]//div[1]";
+        this.clickOnArchieveButton = "(//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ljkNdu ht-32px undefined ht-32px undefined'])[1]";
     }
 
     async goToAccessReviewsOngoing(){
@@ -95,7 +103,7 @@ export class AccessReviewsPage{
         // Cert Owner 
         await this.page.locator(this.certificateOwner).fill(certOwner);
         await setTimeout(2000);
-        await this.page.locator(this.clickForCertOwner).click();
+        await this.page.locator(this.clickForCertOwner).nth(0).click();
         // Cert Description
         await this.page.locator(this.certificateDescription).fill(certDescription);
         await this.page.locator(this.switchHandle).click();
@@ -127,8 +135,6 @@ export class AccessReviewsPage{
         const count = await elements.count();
 
         const textArray = [];
-        textArray.push('User');
-
         for (let i = 0; i < count; i++) {
             const text = await elements.nth(i).textContent();
             textArray.push(text.trim()); 
@@ -157,9 +163,37 @@ export class AccessReviewsPage{
         await this.page.locator(this.clickOnRemediationDate).click();
         await this.page.locator(this.remediationDate).click();
         await this.page.locator(this.clickToApply3).click();
-
         
         await this.page.locator(this.createCertificateButton).click();
+    }
+    async certValidation(certificateData){
+        // validation 
+        const { 
+            certName
+        } = certificateData;
+        await this.page.getByText(certName).nth(0).click();
 
+        // // Wait until the data being processed message is gone 
+        // await this.page.waitForSelector('button:enabled >> text=Review');
+        // await this.page.click('button:enabled >> text=Review');
+
+        const newElements = await this.page.locator('//div[contains(@class, "InovuaReactDataGrid__column-header")]//span[@color="secondary_grey_2" and contains(@class, "typography--variant-dataLabel_small_semibold")]');
+        const count1 = await newElements.count();
+
+        const textArray1 = [];
+        for (let i = 1; i < count1-3; i++) {
+            const text = await newElements.nth(i).textContent();
+            textArray1.push(text.trim()); 
+        }
+        console.log(textArray1);
+
+        expect(textArray).toEqual(textArray1);        
+    }
+
+    async archieveCert(){
+        // Archieve certificate 
+        await this.page.locator(this.clickOnEllipsis).click();
+        await this.page.locator(this.clickOnArchieve).click();
+        await this.page.locator(this.clickOnArchieveButton).click();
     }
 }

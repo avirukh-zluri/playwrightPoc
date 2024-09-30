@@ -25,6 +25,24 @@ export class Application {
         // XPath to find the application name in the second <td> of each row
         this.applicationNameXPath = "//table//tr//td[2]//a//div";
 
+        // Add Plabook
+        this.searchForApp = "//input[@placeholder='Search']";
+        this.clickOnAutomation = "//a[normalize-space()='Automation']";
+        this.clickOnDeprovisioning = "//li[normalize-space()='Deprovisioning']";
+        this.clickOnAdd = "//button[@class='appsad mr-3']";
+        this.clickToAddAction = "(//img[@class='mr-1'])[81]";
+        this.writeAction = "//input[@placeholder='Select an action']";
+        this.clickToAddTask = "//div[@class='z-select-option']";
+        this.playbookAction = "//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@class='container-fluid']/section/div[@class='row']/div[@class='col-md-8 d-flex flex-column pt-5 pb-10 align-items-center actions_info_card']/div[@class='d-flex flex-column align-items-center actions_container']/div[@class='d-flex flex-column']/div[@class='white-bg']/div[@class='p-4 z-w-add-action']/div/div/div[1]";
+        this.clickToAddAssignee = "//input[contains(@placeholder,'Select an assignee')]";
+        this.addAssignee = "//div[@class='s-menu-container shadow-sm mt-1 m-0 select-user-mt w-100']//div[1]//button[1]"; // Department Head
+        this.saveTask = "//button[normalize-space()='Save Task']";
+        this.clickToPublish = "//button[normalize-space()='Publish App Playbook']";
+
+        // Delete Playbook
+        this.clickOnEllipsisButton = "//div[@class='cursor-pointer']//img";
+        this.clickOnDelete1 = "(//div[@id='0'])[1]";
+        this.clickOnDelete2 = "//button[normalize-space()='Delete Playbook']";
     }
 
     // Method to add an application
@@ -122,5 +140,50 @@ export class Application {
 
         // If the application is not found
         console.log(`Application: ${applicationName} not found in the table`);
+    }
+    async addPlaybookForApp(playbookData){
+        const { 
+            name,
+            actionName,
+            playbookActionName,
+        } = playbookData;
+        await this.page.locator(this.searchForApp).fill(name);
+        await this.page.getByText(name).click();
+        await this.page.locator(this.clickOnAutomation).click();
+        await this.page.locator(this.clickOnDeprovisioning).click();
+        
+        // Playbook Creation 
+        await this.page.locator(this.clickOnAdd).click();        
+        await setTimeout(700);
+        await this.page.locator(this.clickToAddAction).click();        
+        await setTimeout(700);
+        await this.page.locator(this.writeAction).click();
+        await setTimeout(700);
+        await this.page.locator(this.writeAction).fill(actionName);
+        await setTimeout(700);
+        await this.page.locator(this.clickToAddTask).click();
+        
+        await this.page.locator('//div[contains(@class, "z-select-selector")]', { hasText: 'Select a manual action template' }).click();       
+        await this.page.locator('//div[contains(@class , "z-select-option ")]').filter({ hasText: playbookActionName }).click();
+
+        await this.page.locator(this.clickToAddAssignee).click();
+        await this.page.locator(this.addAssignee).click();
+        await this.page.locator(this.saveTask).click();
+        await this.page.locator(this.clickToPublish).click();
+
+    }
+
+    async deletePlaybook(playbookData){
+        const { 
+            name
+        } = playbookData;
+        await this.page.locator(this.searchForApp).fill(name);
+        await this.page.getByText(name).click();
+        await this.page.locator(this.clickOnAutomation).click();
+        await this.page.locator(this.clickOnDeprovisioning).click();
+
+        await this.page.locator(this.clickOnEllipsisButton).nth(0).click();
+        await this.page.locator(this.clickOnDelete1).nth(0).click();
+        await this.page.locator(this.clickOnDelete2).click();
     }
 }
