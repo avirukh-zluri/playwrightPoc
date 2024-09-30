@@ -435,7 +435,7 @@ test("Access review" , async ({page}) => {
         name:"Asana"
     });
     
-    // await pageAccessReviews.goToAccessReviewsOngoing();
+    await pageAccessReviews.goToAccessReviewsOngoing();
     // await setTimeout(5000);
     // await pageAccessReviews.certValidation({
     //     certName:"Demo Certificate 1"

@@ -197,3 +197,5 @@ export class AccessReviewsPage{
         await this.page.locator(this.clickOnArchieveButton).click();
     }
 }
+
+// change account
