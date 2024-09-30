@@ -178,7 +178,7 @@ export class AccessReviewsPage{
         // await this.page.click('button:enabled >> text=Review');
 
         const newElements = await this.page.locator('//div[contains(@class, "InovuaReactDataGrid__column-header")]//span[@color="secondary_grey_2" and contains(@class, "typography--variant-dataLabel_small_semibold")]');
-        const count1 = await elements.count();
+        const count1 = await newElements.count();
 
         const textArray1 = [];
         for (let i = 1; i < count1-3; i++) {
