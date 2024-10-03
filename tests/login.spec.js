@@ -16,6 +16,7 @@ import { WorkflowPage } from '../page/WorkflowPage';
 
 
 
+
 async function checkRegexOnPage(page, regex) {
     const pageContent = await page.content();
     return regex.test(pageContent);
@@ -40,6 +41,96 @@ test('Add Contract', async ( {page} ) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
+    // Navigate License 
+    await page.locator("//span[normalize-space()='Licenses']").click();
+    await page.locator("//a[@href='/licenses#allContracts']").click();
+    await page.getByRole('button', { name: 'Add' }).click();
+    
+    // License Navigation 
+    const expectedAppName = 'Asana';
+    await page.fill("//input[@placeholder='Enter App Name']" , 'Asana');
+    await page.getByRole('button', { name: 'Asana', exact: true }).click();
+
+    // Description 
+    const expectedDescirption = 'demo';
+    await page.getByPlaceholder('Description...').fill('demo');
+
+    await page.getByText('Happy').click();
+    await page.getByText('Automation User').first().click();
+    await page.getByText('Automation User').nth(1).click();
+    await page.getByText('Automation User').nth(2).click();
+
+    //App It Owner 
+    const expectedItOwner = 'AUAutomation User 02';
+    await page.getByPlaceholder('Add IT Owner').fill('automation02@zluri.dev');
+    await page.getByRole('button', { name: 'AU Automation User 01' }).click();
+    await page.locator("//body/div[@id='root']/div/div[contains(@class,'large-screen-only')]/div/div[contains(@class,'createplan__wrapper')]/div[contains(@class,'create_stepper_screen_wrapper')]/div[contains(@class,'create_stepper_screen_wrapper_form_display')]/div[contains(@class,'create_stepper_redux_stepper_container')]/div[contains(@class,'stepper__wrapper')]/div[contains(@class,'stepper__step create_stepper_redux_stepper_step')]/div[contains(@class,'stepper__step__card active card')]/div[contains(@class,'rah-static rah-static--height-auto')]/div/div[contains(@class,'step__collapse card-body')]/div[contains(@class,'d-flex flex-column')]/div[9]/div[1]/div[2]/div[1]").click();
+
+    // Start Date
+    const expectedStartDate = 'September 1';
+    await page.getByRole('button', { name: 'September 1,' }).click();
+    await page.getByText('1 year').click();
+
+    // Cancel Date 
+    const expectedCancelDate = 'September 14';
+    await page.getByText('Cancel by Date', { exact: true }).click();
+    await page.getByRole('button', { name: 'September 14,' }).click();
+   
+    // Renew Date 
+    const expectedRenewDate = 'September 12'
+    await page.locator('div').filter({ hasText: /^Renew by Date$/ }).nth(1).click();
+    await page.getByRole('button', { name: 'September 12,' }).click();
+
+    await page.getByText('PIA').click();
+    await page.getByRole('combobox').click();
+    await page.locator('.z__select--options__container--option').first()
+    
+    // Further Navigation to fill Contract 
+    await page.getByPlaceholder('Enter test').fill("test");
+    await page.locator('div').filter({ hasText: /^Select test entity$/ }).nth(1).click();
+    await page.locator('.z__select--options__container--option').first()
+    await page.getByPlaceholder('Enter text_sanity').fill("demo");
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    // Add Document 
+    // Method 1
+    // await page.getByText('+ Add Documents').setInputFiles(path.join(__dirname, 'C:\\Users\\Raja Verma\\Desktop', 'demo.pdf'))
+
+    // Method 2
+    // await page.getByTestId(' Add Documents').click();
+    // await page.getByText(' Add Documents]').setInputFiles('./Users/Raja Verma/Desktop');
+    // await page.locator('text=demo.pdf').click();
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Add contract' }).click();
+    
+    // Contract Name
+    const expectedContractName = "Asana Contract - 01 Sep 2024";
+    
+    
+    await page.getByRole('button', { name: 'Licenses', exact: true }).dblclick();
+    await page.getByRole('link', { name: 'Contracts ' }).click();
+    await page.getByPlaceholder('Search', { exact: true }).fill("Asana Contract - 01 Sep 2024");
+    await page.getByRole('link', { name: 'Asana Contract - 01 Sep' }).first().click();
+    
+ // Validation
+    
+    // Contract Name Validation
+    const actualContractName = await page.getByText('Asana Contract - 01 Sep').nth(1).textContent();
+    expect(actualContractName.trim()).toBe(expectedContractName);
+
+    // App Name Validation 
+    const actualAppName = await page.getByRole('link', { name: 'Asana' }).textContent();
+    expect(actualAppName.trim()).toBe(expectedAppName);
+
+    // Description validaiton 
+    const actualDescription = await page.getByText('demo').first().textContent();
+    expect(actualDescription.trim()).toBe(expectedDescirption);
+
+    // It Owner Validaiton 
+    const actualItOwner = await page.locator('div').filter({ hasText: /^IT OWNERAUAutomation User 02$/ }).getByRole('link').textContent();
+    expect(actualItOwner.trim()).toBe(expectedItOwner);
 
     const license = new LicensePage(page);
     await license.goToLicenses();
@@ -109,9 +200,115 @@ test("Directory" , async ({page}) => {
     await Login.goToLoginPage();
     await Login.login();
 
-    // Users 
+    //Directory
     const pageDirectory = new DirectoryPage(page);
     await pageDirectory.goToDirectory();
+   
+    // Users  
+    await pageDirectory.goToUser();
+    const userHeadElement = await page.locator("div.ins-1");
+    const text = await userHeadElement.textContent(); 
+    expect(text).toBe("Users");
+
+    
+    //Employee count
+    const userHead_employee_count = await page.locator("//a[@class='nav-link d-flex align-items-center text-capitalize active']//div");
+    const head_emp_count_text = await userHead_employee_count.textContent(); 
+    const head_emp_count = parseInt(head_emp_count_text, 10);
+
+    //employee list length vaidation
+    // Scroll to the bottom of the table
+    const tableHandle = await page.$("#scrollRoot");
+    const rowSelector = `${"#scrollRoot"} tr`;
+    
+    let previousRowCount = 0;
+
+    while (true) {
+        // Scroll down
+        await tableHandle.evaluate(element => {
+            element.scrollTop = element.scrollHeight;
+        });
+        
+        // Wait for new rows to load (if applicable)
+        await page.waitForTimeout(5000); // Adjust timeout as necessary
+        
+        // Count the current number of rows
+        const rows = await page.$$eval(rowSelector, rows => rows.length);
+        
+        // Check if we reached the end
+        if (rows === previousRowCount) break;
+        
+        previousRowCount = rows;
+    }
+    
+    // Final count of rows
+    //var initial_totalRows = await page.$$eval(rowSelector, rows => rows.length);
+    let initial_totalRows = previousRowCount;
+    
+    
+    console.log(`Total rows: ${initial_totalRows}`);
+
+    //new to be corrected
+   // expect(head_emp_count).toBe(initial_totalRows)
+
+    await page.getByRole('button', { name: 'Add' }).click();
+    await page.locator("//div[@class='font-18 primary-color text-capitalize']").click()
+    await page.locator("//div[@class='d-flex align-items-center modal-title h4']//div[@id='0']").click()
+
+    var randomnum=Math.floor(Math.random()*(999-100+1)+100);
+    var employee_name="Employee"+randomnum;
+
+    await page.fill("//input[@placeholder='eg: John Doe']",employee_name);
+
+    var employee_mail="emp"+randomnum+"@zluri.com"
+
+    await page.fill("//input[@placeholder='eg: john.doe@mycompany.com']",employee_mail)
+
+    await page.fill("//input[@placeholder='eg: General Associate']","Associate")
+    await page.locator("//div[@class='d-flex align-items-center justify-content-between border-1 border-radius-4']//img").click()
+    await page.locator("//div[@class='add_user_form_grid mt-2']//div//div[@id='0']").click()
+    await page.locator("//input[@placeholder='eg: Sales']").fill("Pod4")
+    await page.locator("//div[@class=' suggestion_menu_application_name text-capitalize ']").click();
+
+    await page.fill("//input[@placeholder='eg: Mark Davis']",'Pod4')
+    await page.locator("//div[contains(@class,'row suggestion_menu_application_name_row')]").click()
+
+    var personal_mail="emp"+randomnum+"@gmail.com"
+    await page.fill("//input[@placeholder='eg: john.doe@gmail.com']",personal_mail)
+
+    await page.locator("//input[contains(@class,'form-check-input position-static')]").click()
+
+    await page.fill("//input[@placeholder='Search User']",'Pod4')
+    await page.locator("//div[@class='row suggestion_menu_application_name_row']").click()
+
+    await page.locator("//div[@class='z__date-picker']//span//span[@class='z__date-picker--placeholder pl-1']").click()
+
+    await page.getByText('25').scrollIntoViewIfNeeded();
+    await page.locator("//abbr[@aria-label='October 31, 2024']").click()
+
+    await page.locator("//button[normalize-space()='Add User']").click()
+
+    //validation of employee addition
+    const notification_message = await page.locator("//div[@class='notification_title']");
+    const text1 = await notification_message.textContent(); 
+    expect(text1).toBe("New user successfully added");
+
+
+    await page.waitForTimeout(2000);
+   
+    //post Employee count
+    const post_userHead_employee_count = await page.locator("//a[@class='nav-link d-flex align-items-center text-capitalize active']//div");
+    const post_head_emp_count_text = await post_userHead_employee_count.textContent(); 
+    const post_head_emp_count = parseInt(post_head_emp_count_text, 10);
+
+    console.log(post_head_emp_count)
+    console.log(head_emp_count)
+
+    expect(post_head_emp_count).toBe(head_emp_count + 1)
+
+
+
+
     await pageDirectory.navigateUsers();
 
     // Department 
@@ -326,18 +523,12 @@ test("Access review" , async ({page}) => {
     const pageAccessReviews = new AccessReviewsPage(page);
 
     // Create Playbook
-    const application = new Application(page);
-    
-    await application.goToApplication();
-    // await application.getMergedApplicationCount();
-    await application.goToAllApp();
-    await application.addPlaybookForApp({
-        name : "Asana",
-        actionName : "Create A Manual Task",
-        playbookActionName : "Add a user to application"
-    });
+    const pageWorkflows = new WorkflowPage(page);
+    await pageWorkflows.goToWorkflows();
+    await pageWorkflows.navigateWorkflowsOnboarding();
+    await pageWorkflows.createPlaybook();
 
-        // Create Certificate
+    // Create Certificate
     await pageAccessReviews.goToAccessReviewsOngoing();
     await setTimeout(3000);
     await pageAccessReviews.createCertificate({
@@ -348,21 +539,9 @@ test("Access review" , async ({page}) => {
         secondaryReviewer: "keerthy",
         appName: "Asana"
     });
-    await setTimeout(2000);
-    // Delete Playbook 
-    await application.goToApplication();
-    await application.goToAllApp();
 
-    await application.deletePlaybook({
-        name:"Asana"
-    });
-    
-    await pageAccessReviews.goToAccessReviewsOngoing();
-    // await setTimeout(5000);
-    // await pageAccessReviews.certValidation({
-    //     certName:"Demo Certificate 1"
-    // });
-    // await pageAccessReviews.archieveCert();
+    // Delete Playbook 
+    pageWorkflows.deletePlaybook();
 
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();
