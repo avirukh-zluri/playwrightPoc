@@ -519,16 +519,18 @@ test("Access review" , async ({page}) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
-
     const pageAccessReviews = new AccessReviewsPage(page);
-
     // Create Playbook
-    const pageWorkflows = new WorkflowPage(page);
-    await pageWorkflows.goToWorkflows();
-    await pageWorkflows.navigateWorkflowsOnboarding();
-    await pageWorkflows.createPlaybook();
-
-    // Create Certificate
+    const application = new Application(page);
+    await application.goToApplication();
+    // await application.getMergedApplicationCount();
+    await application.goToAllApp();
+    await application.addPlaybookForApp({
+        name : "Asana",
+        actionName : "Create A Manual Task",
+        playbookActionName : "Add a user to application"
+    });
+        // Create Certificate
     await pageAccessReviews.goToAccessReviewsOngoing();
     await setTimeout(3000);
     await pageAccessReviews.createCertificate({
@@ -539,43 +541,52 @@ test("Access review" , async ({page}) => {
         secondaryReviewer: "keerthy",
         appName: "Asana"
     });
-
-    // Delete Playbook 
-    pageWorkflows.deletePlaybook();
-
+    await setTimeout(2000);
+    // Delete Playbook
+    await application.goToApplication();
+    await application.goToAllApp();
+    await application.deletePlaybook({
+        name:"Asana"
+    });
+    await pageAccessReviews.goToAccessReviewsOngoing();
+    // await setTimeout(5000);
+    // await pageAccessReviews.certValidation({
+    //     certName:"Demo Certificate 1"
+    // });
+    // await pageAccessReviews.archieveCert();
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();
-
-
-
     // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
-
     // // check - 1
     // await performCheck(page, regex, 1);
-
     // await page.getByRole('button', { name: 'Access Reviews Access Reviews' }).click();
     // // check - 2
     // await performCheck(page, regex, 2);
-
     // await page.getByRole('button', { name: 'Create New Certification' }).click();
     // // check - 3
     // await performCheck(page, regex, 3);
-
     // await page.getByRole('button', { name: 'Cancel' }).click();
     // // check - 4
     // await performCheck(page, regex, 4);
-
     // await page.getByRole('button', { name: 'Yes' }).click();
     // // check - 5
     // await performCheck(page, regex, 5);
-
     // await page.getByRole('link', { name: 'Upcoming' }).click();
     // // check - 6
     // await performCheck(page, regex, 6);
-
     // await page.getByRole('link', { name: 'Completed' }).click();
     // // check - 7
     // await performCheck(page, regex, 7);
+
+
+
+
+
+
+
+
+
+
 });
 
 test("Report" , async ({page}) => {
