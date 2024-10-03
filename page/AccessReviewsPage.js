@@ -172,6 +172,7 @@ export class AccessReviewsPage{
             certName
         } = certificateData;
         await this.page.getByText(certName).nth(0).click();
+        await setTimeout(60000);
 
         // // Wait until the data being processed message is gone 
         // await this.page.waitForSelector('button:enabled >> text=Review');
