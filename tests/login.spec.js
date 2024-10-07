@@ -37,7 +37,7 @@ async function performCheck(page, regex, checkNumber) {
 test.describe.configure({ mode: 'parallel' });
 
 
-test('Add Contract', async ( {page} ) => { 
+test('Licenses Contract', async ( {page} ) => { 
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
@@ -263,7 +263,7 @@ test("Directory" , async ({page}) => {
     // await performCheck(page, regex, 8);
 });
 
-test("Licenses" , async ({page}) => {
+test("Licenses Subscription" , async ({page}) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
@@ -272,69 +272,41 @@ test("Licenses" , async ({page}) => {
     
     // Go to Licenses
     await pageLicenses.goToLicenses();
-
-    // Navigate inside Licenses
-    await pageLicenses.navigateLicenses();
-
-    // Go to Renewals 
-    await pageLicenses.navigateRenewals();
-
-    // Go to Vendores 
-    await pageLicenses.navigateVendors();
-
-
-    // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
-
-    // // check - 1
-    // await performCheck(page, regex, 1);
-
-    // await page.getByRole('button', { name: 'Licenses', exact: true }).click();
-    // // check - 2
-    // await performCheck(page, regex, 2);
-
-    // await page.getByAltText('dropdown').click();
-    // await page.locator('#root').getByText('Main View').click();
-
-    // // Hide and Show Summary 
-    // var showSummary = await page.getByRole('img', { name: 'toggle' }).textContent();
-    // if(showSummary){
-    //     await page.getByRole('img', { name: 'toggle' }).click();
-
-    // }
-    // else{
-    //     await page.getByRole('img', { name: 'toggle' }).click();
-    // }
-    // await page.getByRole('link', { name: 'Subscriptions' }).click();
-    // // check - 3
-    // await performCheck(page, regex, 3);
-
-    // await page.getByRole('link', { name: 'Contracts' }).click();
-    // // check - 4
-    // await performCheck(page, regex, 4);
-
-    // await page.getByRole('link', { name: 'Perpetuals' }).click();
-    // // check - 5
-    // await performCheck(page, regex, 5);
-
-    //                           // Renewals
-    // await page.getByRole('button', { name: 'Renewals Renewals' }).click();
-    // // check - 6
-    // await performCheck(page, regex, 6);
-    //                             // Vendors
-    // await page.getByRole('button', { name: 'Vendors Vendors' }).click();
-    // // check - 7
-    // await performCheck(page, regex, 7);
-    // await setTimeout(10000);
-    // // Hide and Show Summary 
-    // showSummary = await page.getByRole('img', { name: 'toggle' }).textContent();
-    // if(showSummary){
-    //     await page.getByRole('img', { name: 'toggle' }).click();
-    // }
-    // else{
-    //     await page.getByRole('img', { name: 'toggle' }).click();
-    // }
+    // Create Subscription
+    await pageLicenses.createSubscription({
+        appName:"Asana",
+        descName:"Demo",
+        vendorName:"Asana",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
 });
 
+test("License Perpetuals" , async({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const pageLicenses = new LicensePage(page);
+    
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    // Create Perpetuals
+    await pageLicenses.createPerpetuals({
+        appName:"Asana",
+        descName:"Demo",
+        vendorName:"Asana",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
+    });
+
+});
 
 test ("Optimization" , async ({page}) => {
     const Login = new LoginPage(page);

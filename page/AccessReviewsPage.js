@@ -6,6 +6,7 @@ const {test , expect} = require('@playwright/test');
 export class AccessReviewsPage{
     constructor(page){
         this.page = page;
+        this.textArray = [];
         this.clickOnAccessReviewsOngoing = "//span[normalize-space()='Access Reviews']";
         this.clickOnAccessReviewsUpcoming = "//div[normalize-space()='Upcoming']";
         this.clickOnAccessReviewsCompleted = "//div[normalize-space()='Completed']";
@@ -73,6 +74,7 @@ export class AccessReviewsPage{
         this.clickOnEllipsis = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/button[1]/img[1]";
         this.clickOnArchieve = "//div[contains(@class,'menu-options-container')]//div[1]";
         this.clickOnArchieveButton = "(//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ljkNdu ht-32px undefined ht-32px undefined'])[1]";
+        this.clickOnReviewButton = "//div[@class='d-flex align-items-center justify-content-center'][normalize-space()='Review']";
     }
 
     async goToAccessReviewsOngoing(){
@@ -133,14 +135,12 @@ export class AccessReviewsPage{
         const elements = await this.page.locator("(//ul)[3]//li//span[not(@color='secondary_grey_1')]");
 
         const count = await elements.count();
-
-        const textArray = [];
         for (let i = 0; i < count; i++) {
             const text = await elements.nth(i).textContent();
-            textArray.push(text.trim()); 
+            this.textArray.push(text.trim()); 
         }
 
-        console.log(textArray);
+        console.log(this.textArray);
         await this.page.locator(this.clickOnNext4).click();
 
         // Add playbook 
@@ -171,13 +171,30 @@ export class AccessReviewsPage{
         const { 
             certName
         } = certificateData;
-        await this.page.getByText(certName).nth(0).click();
-        await setTimeout(60000);
+        await this.page.getByText(certName).nth(1).click();
+        // await setTimeout(60000);
 
         // // Wait until the data being processed message is gone 
         // await this.page.waitForSelector('button:enabled >> text=Review');
         // await this.page.click('button:enabled >> text=Review');
 
+        // await new Promise(resolve => setTimeout(resolve, 30000));
+
+        // // Wait for the 'Review' element with the specified XPath to be visible with polling
+        // await this.page.waitForFunction(() => {
+        // const reviewElement = document.evaluate(
+        //     "//div[@class='d-flex align-items-center justify-content-center'][normalize-space()='Review']",
+        //     document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
+        // ).singleNodeValue;
+        
+        // return reviewElement && reviewElement.offsetParent !== null; // Checks if the element is visible
+        // }, {
+        // timeout: 0,  // No timeout, it will wait indefinitely
+        // polling: 10000  // Polling interval of 10 seconds
+        // });
+
+        // // Click the 'Review' element
+        await this.page.locator(this.clickOnReviewButton).click();
         const newElements = await this.page.locator('//div[contains(@class, "InovuaReactDataGrid__column-header")]//span[@color="secondary_grey_2" and contains(@class, "typography--variant-dataLabel_small_semibold")]');
         const count1 = await newElements.count();
 
@@ -188,7 +205,7 @@ export class AccessReviewsPage{
         }
         console.log(textArray1);
 
-        expect(textArray).toEqual(textArray1);        
+        expect(textArray1).toEqual(this.textArray);        
     }
 
     async archieveCert(){
