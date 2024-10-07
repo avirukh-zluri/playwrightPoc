@@ -71,7 +71,7 @@ module.exports = defineConfig({
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
-  timeout: 100000, // Global test timeout
+  timeout: 140000, // Global test timeout
   /* Run your local dev server before starting the tests */
   // webServer: {
   //   command: 'npm run start',

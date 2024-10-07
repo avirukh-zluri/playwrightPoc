@@ -64,6 +64,14 @@ export class LicensePage{
         this.vendorNameValidation = "div[class='d-flex align-items-center'] a[class='custom__app__name__css text-decoration-none']";
         this.primaryOwnerNameValidation = "//div[4]//div[2]//div[1]//div[1]//div[1]//a[1]//div[1]//div[1]//div[1]";
         this.financeOwnerNameValidation = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[1]/div[3]/div[5]/div[2]/div[1]/div[1]/div[1]/a[1]/div[1]/div[1]/div[1]";
+
+        // Create Subscription 
+        this.clickOnDropDownRenewalTermsValue = "//select[@class='recurring_frequency_input form-control']";
+        this.clickOnDropDownRenewalTerms = "//select[@class='recurring_interval_dropdown form-control text-capitalize']";
+        this.clickOnNext4 = "//div[@class='d-flex flex-column']//button[@class='z__button mt-4'][normalize-space()='Next']";
+        this.clickOnNext5 = "(//button[@class='z__button mt-4'][normalize-space()='Next'])[2]";
+        this.clickOnNext6 = "(//button[@class='z__button undefined'])[1]";
+        this.clickToAddSubscription = "(//button[normalize-space()='Add subscription'])[1]";
     }
 
     async goToLicenses(){
@@ -136,8 +144,59 @@ export class LicensePage{
         expect(financeOwner.toLowerCase()).toEqual(expectedFinanceOwnerName.toLowerCase());
         
     }
-    async navigateLicenses(){
+
+    async createSubscription (licensesData){
+        const {
+            appName,
+            descName,
+            vendorName,
+            primaryOwner,
+            financeOwner,
+            ItOwner,
+            negotiationOwner,
+            renewalTermValue,
+            renewalTerm
+        } = licensesData;
         await this.page.locator(this.clickOnSubscriptions).click();
+        await this.page.locator(this.clickOnAdd).click();
+        // App Name
+        await this.page.locator(this.contractAppName).fill(appName);
+        await this.page.locator(this.clickToSelectApp).nth(0).click();
+        // Description
+        await this.page.locator(this.description).fill(descName);
+        // Vendor Name
+        await this.page.locator(this.fillVendorName).fill(vendorName);
+        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        // Primary Owner
+        await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
+        await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
+        //Finance Owner
+        await this.page.locator(this.fillFinanceOwner).fill(financeOwner);
+        await this.page.locator(this.clickToAddFinanceOwner).nth(0).click();
+        //Negotiation Owner
+        await this.page.locator(this.fillNegotiationOwner).fill(negotiationOwner);
+        await this.page.locator(this.clickToAddNegotiationOwner).nth(0).click();
+        // IT Owner
+        await this.page.locator(this.fillITOwner).fill(ItOwner);
+        await this.page.locator(this.clickToAddITOwner).nth(0).click();
+        // Start Date
+        await this.page.locator(this.clickOnStartDate).click();
+        await this.page.locator(this.startDate).click();
+        // Renewal Term
+        await this.page.locator(this.clickOnDropDownRenewalTermsValue).click();
+        await this.page.getByRole('combobox').first().selectOption(renewalTermValue);
+        await this.page.locator(this.clickOnDropDownRenewalTerms).click();
+        await this.page.getByText(renewalTerm).nth(1).click();
+
+        await this.page.locator(this.clickOnNext4).click();
+        await this.page.locator(this.clickOnNext5).click();
+        await this.page.locator(this.clickOnNext6).click();
+        await this.page.locator(this.clickToAddSubscription).click();
+        
+
+    }
+    async navigateLicenses(){
+        
         await this.page.locator(this.clickOnContracts).click();
         await this.page.locator(this.clickOnPerpetual).click();
     }
