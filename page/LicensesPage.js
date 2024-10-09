@@ -70,6 +70,13 @@ export class LicensePage{
         this.clickOnDropDownRenewalTerms = "//select[@class='recurring_interval_dropdown form-control text-capitalize']";
         this.clickOnNext4 = "//div[@class='d-flex flex-column']//button[@class='z__button mt-4'][normalize-space()='Next']";
         this.clickOnNext5 = "(//button[@class='z__button mt-4'][normalize-space()='Next'])[2]";
+        this.clickToAddLicense = "//div[@class='add_license_button']";
+        this.clickToEnterLicenseName = "//input[@placeholder='Enter Name']";
+        this.addCost = "//input[@placeholder='Cost']";
+        this.clickToAddTenure = "//select[@class='form-control']";
+        this.addLicenseDescription = "//input[@placeholder='Enter Description']";
+        this.addQuantity = "//input[@placeholder='Enter Quantity']";
+        this.clickToSaveLicense = "//button[normalize-space()='Save']";
         this.clickOnNext6 = "(//button[@class='z__button undefined'])[1]";
         this.clickToAddSubscription = "(//button[normalize-space()='Add subscription'])[1]";
 
@@ -88,7 +95,12 @@ export class LicensePage{
             primaryOwner,
             financeOwner,
             ItOwner,
-            negotiationOwner
+            negotiationOwner,
+            licenseName,
+            cost,
+            tenure,
+            descriptionLicense,
+            quantity
         } = licensesData;
         await this.page.locator(this.clickOnContracts).click();
 
@@ -127,6 +139,18 @@ export class LicensePage{
         
         await this.page.locator(this.clickOnNext1).click();
         await this.page.locator(this.clickOnNext2).click();
+
+        // Add License
+        await this.page.locator(this.clickToAddLicense).click();
+        await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
+        await this.page.locator(this.addCost).fill(cost);
+        
+        // Locator needs to be improved 
+        await this.page.locator('div').filter({ hasText: /^per termper lic\. termper monthper quarterper year$/ }).getByRole('combobox').selectOption(tenure);
+        await this.page.locator(this.addLicenseDescription).fill(descriptionLicense);
+        await this.page.locator(this.addQuantity).fill(quantity);
+        await this.page.locator(this.clickToSaveLicense).click();
+
         await this.page.locator(this.clickOnNext3).click();
         await this.page.locator(this.clickOnAddContract).click();
 
@@ -158,7 +182,12 @@ export class LicensePage{
             ItOwner,
             negotiationOwner,
             renewalTermValue,
-            renewalTerm
+            renewalTerm,
+            licenseName,
+            cost,
+            tenure,
+            descriptionLicense,
+            quantity
         } = licensesData;
         await this.page.locator(this.clickOnSubscriptions).click();
         await this.page.locator(this.clickOnAdd).click();
@@ -193,6 +222,19 @@ export class LicensePage{
 
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();
+
+        // Add License
+        await this.page.locator(this.clickToAddLicense).click();
+        await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
+        await this.page.locator(this.addCost).fill(cost);
+        
+        // Locator needs to be improved 
+        await this.page.locator('div').filter({ hasText: /^per termper monthper quarterper year$/ }).getByRole('combobox').selectOption(tenure);
+        await this.page.locator(this.addLicenseDescription).fill(descriptionLicense);
+        await this.page.locator(this.addQuantity).fill(quantity);
+        await this.page.locator(this.clickToSaveLicense).click();
+
+
         await this.page.locator(this.clickOnNext6).click();
         await this.page.locator(this.clickToAddSubscription).click();
         
@@ -207,6 +249,11 @@ export class LicensePage{
             financeOwner,
             ItOwner,
             negotiationOwner,
+            licenseName,
+            cost,
+            tenure,
+            descriptionLicense,
+            quantity
         } = licensesData;
         await this.page.locator(this.clickOnPerpetual).click();
         await this.page.locator(this.clickOnAdd).click();
@@ -238,6 +285,15 @@ export class LicensePage{
 
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();
+
+        // Add License
+        await this.page.locator(this.clickToAddLicense).click();
+        await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
+        await this.page.locator(this.addCost).fill(cost);
+        await this.page.locator(this.addLicenseDescription).fill(descriptionLicense);
+        await this.page.locator(this.addQuantity).fill(quantity);
+        await this.page.locator(this.clickToSaveLicense).click();
+
         await this.page.locator(this.clickOnNext6).click();
         await this.page.locator(this.clickToAddPerpetuals).click();
 
