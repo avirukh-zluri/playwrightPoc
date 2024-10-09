@@ -50,7 +50,12 @@ test('Licenses Contract', async ( {page} ) => {
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
-        negotiationOwner:"Jocker"
+        negotiationOwner:"Jocker",
+        licenseName:"Pro",
+        cost:"1000",
+        tenure:"months",
+        descriptionLicense:"Demo",
+        quantity:"1000"
     });
 });
 
@@ -282,7 +287,12 @@ test("Licenses Subscription" , async ({page}) => {
         ItOwner:"Jocker",
         negotiationOwner:"Jocker",
         renewalTermValue: "5" ,
-        renewalTerm:"Years"
+        renewalTerm:"Years",
+        licenseName:"Pro",
+        cost:"1000",
+        tenure:"months",
+        descriptionLicense:"Demo",
+        quantity:"1000"
     });
 });
 
@@ -305,7 +315,12 @@ test("License Perpetuals" , async({page}) => {
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
-        negotiationOwner:"Jocker"
+        negotiationOwner:"Jocker",
+        licenseName:"Pro",
+        cost:"1000",
+        tenure:"months",
+        descriptionLicense:"Demo",
+        quantity:"1000"
     });
 
 });
