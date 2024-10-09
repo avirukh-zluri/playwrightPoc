@@ -46,7 +46,7 @@ test('Licenses Contract', async ( {page} ) => {
     await license.createContract({
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Asana",
+        vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
@@ -276,7 +276,7 @@ test("Licenses Subscription" , async ({page}) => {
     await pageLicenses.createSubscription({
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Asana",
+        vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
@@ -285,6 +285,8 @@ test("Licenses Subscription" , async ({page}) => {
         renewalTerm:"Years"
     });
 });
+
+
 
 test("License Perpetuals" , async({page}) => {
     const Login = new LoginPage(page);
@@ -299,7 +301,7 @@ test("License Perpetuals" , async({page}) => {
     await pageLicenses.createPerpetuals({
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Asana",
+        vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
