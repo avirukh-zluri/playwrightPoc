@@ -239,7 +239,7 @@ export class LicensePage{
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();
         await this.page.locator(this.clickOnNext6).click();
-        // await this.page.locator(this.clickToAddPerpetuals).click();
+        await this.page.locator(this.clickToAddPerpetuals).click();
 
     }
     async navigateRenewals(){
