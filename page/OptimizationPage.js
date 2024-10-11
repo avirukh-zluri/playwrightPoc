@@ -8,3 +8,4 @@ export class OptimizationPage{
         await this.page.locator(this.clickOnOptimization).click();
     }
 }
+

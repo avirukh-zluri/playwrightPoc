@@ -7,5 +7,5 @@ node_modules/
 /allure-report
 .vscode
 .DS_Store
-.env.release
-.env.production
+.env.production_anjali
+.env.release_anjali

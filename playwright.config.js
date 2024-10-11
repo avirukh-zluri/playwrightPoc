@@ -15,7 +15,7 @@ import * as fs from 'fs';
 // Load environment variables from .env file
 dotenv.config();
 
-const env = process.env.ENV || 'production';
+const env = process.env.ENV || 'production_anjali';
 const envFile = `.env.${env}`;
 
 // Check if the environment-specific file exists and load it
