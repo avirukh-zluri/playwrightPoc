@@ -9,4 +9,3 @@ node_modules/
 .DS_Store
 .env.release
 .env.production
-test-1.spec.ts 

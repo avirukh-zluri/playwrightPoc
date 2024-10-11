@@ -147,29 +147,34 @@ test("Directory" , async ({page}) => {
     const head_emp_count_text = await userHead_employee_count.textContent(); 
     const head_emp_count = parseInt(head_emp_count_text, 10);
 
+
+     // Wait for the table body to be visible
+     const tableBodyLocator = page.locator('tbody'); 
+     await tableBodyLocator.waitFor(); 
     //employee list length vaidation
     // Scroll to the bottom of the table
     const tableHandle = await page.$("#scrollRoot");
-    const rowSelector = `${"#scrollRoot"} tr`;
+   // const rowSelector = `${"#scrollRoot"} tr`;
     
     let previousRowCount = 0;
+    let currentRowCount=0;
 
     while (true) {
-        // Scroll down
-        await tableHandle.evaluate(element => {
-            element.scrollTop = element.scrollHeight;
+         // Scroll the container directly
+         await tableHandle.evaluate(element => {
+            element.scrollTop += 300; // Adjust this value as needed
         });
-        
-        // Wait for new rows to load (if applicable)
-        await page.waitForTimeout(5000); // Adjust timeout as necessary
-        
-        // Count the current number of rows
-        const rows = await page.$$eval(rowSelector, rows => rows.length);
-        
+
+        // Wait for a moment to allow new rows to load
+        await page.waitForTimeout(1000); // Adjust based on your application's loading speed
+
+        // Get the current number of rows
+        currentRowCount = await tableBodyLocator.locator('tr').count();
+
         // Check if we reached the end
-        if (rows === previousRowCount) break;
+        if (currentRowCount === previousRowCount) break;
         
-        previousRowCount = rows;
+        previousRowCount = currentRowCount;
     }
     
     // Final count of rows
@@ -178,7 +183,53 @@ test("Directory" , async ({page}) => {
     
     
     console.log(`Total rows: ${initial_totalRows}`);
+//new
+    const tableBodyLocator_user = page.locator('//tbody'); // Use the appropriate selector
+    const rows_user = await tableBodyLocator_user.locator('tr'); // Select all rows within the table body
+    const rowCount_user = await rows_user.count(); // Get the number of rows
 
+    console.log(`Number of rows user: ${rowCount_user}`);
+//AV
+
+async function scrollThroughDynamicElements(page, selector, maxScrolls = 10) {
+    let previousElementCount = 0;
+    let scrollCount = 0;
+    let noNewElementsCount = 0;
+    while (scrollCount < maxScrolls) {
+      // Get all current elements
+      const elements = await page.$$("(//tr[@class='table__row undefined'])");
+      // If no new elements loaded in the last 3 scrolls, break the loop
+      if (elements.length === previousElementCount) {
+        noNewElementsCount++;
+        if (noNewElementsCount >= 3) break;
+      } else {
+        noNewElementsCount = 0;
+      }
+      // Process new elements
+      for (let i = previousElementCount; i < elements.length; i++) {
+        const element = elements[i];
+        await element.scrollIntoViewIfNeeded();
+        // Optional: Add a small delay
+        await page.waitForTimeout(500);
+        // Optional: Perform actions on the element
+        // For example: await element.click();
+        // Optional: Log the current element
+        console.log('Processed element:', await element.evaluate(el => el.textContent));
+      }
+      // Scroll to the last element to trigger loading more
+      if (elements.length > 0) {
+        await elements[elements.length - 1].scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000); // Wait for potential new elements to load
+      }
+      previousElementCount = elements.length;
+      scrollCount++;
+      console.log(`Scroll ${scrollCount}: Processed ${elements.length} elements`);
+    }
+    console.log(`Finished scrolling. Total elements processed: ${previousElementCount}`);
+  }
+  
+
+  
     //new to be corrected
    // expect(head_emp_count).toBe(initial_totalRows)
 
@@ -279,7 +330,7 @@ test("Directory" , async ({page}) => {
     // // check - 7
     // await performCheck(page, regex, 7);
 
-                             // Department
+     // Department
     // await page.getByRole('button', { name: 'Departments Departments' }).click();
     //  // check - 8
     // await performCheck(page, regex, 8);
@@ -335,6 +386,62 @@ test("Subscription without License" , async ({page}) => {
     });
 });
 
+    test("Renewals", async ({page}) => {
+        const Login = new LoginPage(page);
+        await Login.goToLoginPage();
+        await Login.login();
+
+        await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
+        await page.locator("//span[normalize-space()='Renewals']").click();
+
+
+    });
+
+    test("Vendors", async ({page}) => {
+        const Login = new LoginPage(page);
+        await Login.goToLoginPage();
+        await Login.login();
+        await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
+        await page.locator("//span[normalize-space()='Vendors']").click();
+
+
+        //name validation
+        const vendorHeadElement = await page.locator("//div[@class='NavH border-bottom']/div");
+        const text = await vendorHeadElement.textContent(); 
+        expect(text).toBe("Vendors");
+
+        //add new vendor
+        await page.getByRole('button', { name: 'Add' }).click();
+
+        var randomnum=Math.floor(Math.random()*(999-100+1)+100);
+        var vendor_name="TestVendor"+randomnum;
+        await page.locator("//input[@placeholder='Vendor Name']").fill(vendor_name);
+        await page.locator("[aria-placeholder='Add Category']").fill("test");
+        await page.locator("//input[@placeholder='Add Owner']").fill("santhan");
+        await page.locator("//body/div[@id='root']/div/div[contains(@class,'large-screen-only')]/div/div[contains(@class,'addContractModal__TOP')]/form[contains(@class,'w-100')]/div/div[contains(@class,'addContractModal__body_upper_inner')]/div[contains(@class,'w-100 form-group')]/div[contains(@class,'position-relative w-100')]/div[contains(@class,'')]/div/button[contains(@class,'')]/div[1]/div[1]").click();
+        await page.locator("//input[@placeholder='Website']").fill("www.zluri.com");
+
+        await page.locator("//img[@class='contact_delete_icon cursor-pointer']").click();
+        //scroll to view
+        //await page.getByText('Phone Number').scrollIntoViewIfNeeded();
+        
+        // await page.locator("//input[@placeholder='Name']").fill(vendor_name);
+        // await page.locator("//input[@placeholder='Job Title']").fill("test");
+        // await page.locator("//input[@placeholder='Country code']").fill(+91);
+        // await page.locator("//input[@placeholder='Phone Number']").fill("123456789");
+        // await page.locator("//input[@placeholder='Email']").fill("enteremail@gmail.com");
+        await page.getByRole('button', { name: 'Add Vendor' }).click();
+
+
+            //verify the existance of the added vendor
+            await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill("TestVendor");
+
+            //verify the vendor must exist
+            const vendor_row_ele = await page.locator("(//tr[@class='table__row undefined'][1]//td[2]//div//a)")
+            const vendor_name_list = await vendor_row_ele.textContent();
+            console.log(vendor_name_list);
+
+    });
 
 
 test("Perpetual With License" , async({page}) => {
@@ -392,6 +499,56 @@ test ("Optimization" , async ({page}) => {
     const pageOptimization = new OptimizationPage(page);
 
     await pageOptimization.goToOptimization();
+
+    const savings_under_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
+    
+    const savings = parseFloat(savings_under_review_ele.replace(/[^\d.-]/g, ''));
+   // const savings_under_review_num = parseInt(savings_under_review, 10);
+    console.log(savings);
+
+
+    const tableBodyLocator = page.locator('.optimization_summary_table_body'); // Use the appropriate selector
+    const rows = await tableBodyLocator.locator('tr'); // Select all rows within the table body
+    const rowCount = await rows.count(); // Get the number of rows
+
+    console.log(`Number of rows: ${rowCount}`);
+
+    // let sum=0;
+    // for(let i =0;i<rowCount;i++){
+    //     const rowValue = await rows.nth(i).locator('.optimization_summary_table_body').textContent(); // Replace 'td-value-selector' with the selector for the specific column containing the values
+    
+    // // Check if rowValue is not null or empty
+    // if (rowValue) {
+    //     const numericValue = parseFloat(rowValue.replace(/[^\d.-]/g, '')); // Convert to number
+    //     sum += isNaN(numericValue) ? 0 : numericValue; // Add to total, ignore if NaN
+    // }
+
+    const rowss = await page.$$('tbody tr');
+
+    let totalSum = 0;
+
+    // Iterate through each row
+    for (const row of rowss) {
+        // Get the value from the specified locator
+        const value = await row.$eval('td:nth-child(3) div', div => div.innerText);
+        
+        // Remove the $ sign and convert to number
+        const numericValue = parseFloat(value.replace(/[^\d.-]/g, '')); // Handle comma in numbers
+
+        // Add the value to the total sum if it's a valid number
+        if (!isNaN(numericValue)) {
+            totalSum += numericValue;
+        }
+    }
+
+    console.log(totalSum);
+
+    function areEqualUpToOneDecimal(num1, num2) {
+        return num1.toFixed(1) === num2.toFixed(1);
+    }
+    
+    expect(savings.toFixed(1)).toBe(totalSum.toFixed(1));
+    console.log(areEqualUpToOneDecimal(totalSum, savings));  
 
     // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
 
