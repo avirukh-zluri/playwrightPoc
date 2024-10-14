@@ -181,7 +181,7 @@ export class Application {
         await this.page.getByText(name).click();
         await this.page.locator(this.clickOnAutomation).click();
         await this.page.locator(this.clickOnDeprovisioning).click();
-
+        
         await this.page.locator(this.clickOnEllipsisButton).nth(0).click();
         await this.page.locator(this.clickOnDelete1).nth(0).click();
         await this.page.locator(this.clickOnDelete2).click();
