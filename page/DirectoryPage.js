@@ -34,7 +34,7 @@ export class DirectoryPage {
         await this.page.locator(this.clickOnGroup).click();
         await this.page.locator(this.clickOnService).click();
         await this.page.locator(this.clickOnExternal).click();
-        await this.page.locator(this.clickOnMarkedForOnboarding).click();
+       // await this.page.locator(this.clickOnMarkedForOnboarding).click();
     }
     async navigateDepartment(){
         await this.page.locator(this.clickOnDepartment).click();
