@@ -288,13 +288,19 @@ async function scrollThroughDynamicElements(page, selector, maxScrolls = 10) {
 
     expect(post_head_emp_count).toBe(head_emp_count + 1)
 
+  //search the added user
+    await page.locator("//input[@placeholder='Search']").fill(employee_name);
+    await page.waitForTimeout(5000);
+    const user_list_name_ele = await page.locator("//div[@class='truncate_10vw text-capitalize']");
+    const user_list_name = await user_list_name_ele.textContent(); 
+    expect(user_list_name).toBe(employee_name);
 
 
 
     await pageDirectory.navigateUsers();
 
     // Department 
-    await pageDirectory.navigateDepartment();
+   // await pageDirectory.navigateDepartment();
 
     // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
 
@@ -394,7 +400,21 @@ test("Subscription without License" , async ({page}) => {
         await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
         await page.locator("//span[normalize-space()='Renewals']").click();
 
+        //name validation
+        const RenewalsHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+        const text = await RenewalsHeadElement.textContent(); 
+        expect(text).toBe("Renewals");
 
+        await page.locator("//button[@class='z__button is-active normal']").click();
+
+        //month card
+        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click()
+        await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
+        await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
+
+        const notification_message_renewal_ele = await page.locator("//div[@class='notification_title']");
+        const  notification_message_renewal= await notification_message_renewal_ele.textContent(); 
+        expect(notification_message_renewal).toBe("Reminder successfully updated");
     });
 
     test("Vendors", async ({page}) => {
@@ -404,11 +424,24 @@ test("Subscription without License" , async ({page}) => {
         await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
         await page.locator("//span[normalize-space()='Vendors']").click();
 
-
+        await page.waitForTimeout(5000);
         //name validation
-        const vendorHeadElement = await page.locator("//div[@class='NavH border-bottom']/div");
-        const text = await vendorHeadElement.textContent(); 
-        expect(text).toBe("Vendors");
+        const vendorHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+        const vendor_head_text = await vendorHeadElement.evaluate(el => el.childNodes[0].textContent.trim());
+          
+         
+        expect(vendor_head_text).toBe("Vendors");
+
+
+        //initial vendor count
+        const vendor_count_Element = await page.locator("//div[@class='mx-1']");
+        const vendor_count_text = await vendor_count_Element.textContent(); 
+        console.log(vendor_count_text);
+
+        const match = vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
+        const numberOfVendors = match[0]; // Extract the matched number
+        console.log(numberOfVendors); 
+
 
         //add new vendor
         await page.getByRole('button', { name: 'Add' }).click();
@@ -417,8 +450,8 @@ test("Subscription without License" , async ({page}) => {
         var vendor_name="TestVendor"+randomnum;
         await page.locator("//input[@placeholder='Vendor Name']").fill(vendor_name);
         await page.locator("[aria-placeholder='Add Category']").fill("test");
-        await page.locator("//input[@placeholder='Add Owner']").fill("santhan");
-        await page.locator("//body/div[@id='root']/div/div[contains(@class,'large-screen-only')]/div/div[contains(@class,'addContractModal__TOP')]/form[contains(@class,'w-100')]/div/div[contains(@class,'addContractModal__body_upper_inner')]/div[contains(@class,'w-100 form-group')]/div[contains(@class,'position-relative w-100')]/div[contains(@class,'')]/div/button[contains(@class,'')]/div[1]/div[1]").click();
+        await page.locator("//input[@placeholder='Add Owner']").fill("san");
+        await page.locator("(//div[@class='s-menu-container shadow-sm mt-1 undefined']//div[1]//button//div[2]//div//div)").click();
         await page.locator("//input[@placeholder='Website']").fill("www.zluri.com");
 
         await page.locator("//img[@class='contact_delete_icon cursor-pointer']").click();
@@ -432,14 +465,52 @@ test("Subscription without License" , async ({page}) => {
         // await page.locator("//input[@placeholder='Email']").fill("enteremail@gmail.com");
         await page.getByRole('button', { name: 'Add Vendor' }).click();
 
-
+        await page.waitForTimeout(5000);
             //verify the existance of the added vendor
-            await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill("TestVendor");
+            await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").type(vendor_name);
+            await page.waitForTimeout(5000);
+
 
             //verify the vendor must exist
-            const vendor_row_ele = await page.locator("(//tr[@class='table__row undefined'][1]//td[2]//div//a)")
-            const vendor_name_list = await vendor_row_ele.textContent();
-            console.log(vendor_name_list);
+            // const vendor_row_ele = await page.locator("(//tbody//tr//td[2]//div//a[@class='.table-link.truncate_10vw']")
+            // const vendor_name_list = await vendor_row_ele.textContent();
+            // console.log(vendor_name_list);
+
+            //Delete the Added Vendor
+            await page.locator("//input[@id='preventRowClick']").click();
+            await page.waitForTimeout(2000);
+            await page.locator("//div[@class='Uploads__right']//div[1]//a[@class='cursor-pointer autho__dd__cont ml-3 mt-auto mb-auto text-decoration-none']//div").click();
+            await page.locator("//a[normalize-space()='Delete Vendors']").click();
+            await page.waitForTimeout(4000);
+
+            await page.reload();
+            await page.waitForTimeout(4000);
+            const vendor_count_Element_post_delelte = await page.locator("//div[@class='mx-1']");
+            const vendor_count_text_post_delelte = await vendor_count_Element_post_delelte.textContent(); 
+            console.log(vendor_count_text_post_delelte);
+
+        const matched = vendor_count_text_post_delelte.match(/(\d+)/); // This will match the first sequence of digits
+        const numberOfVendors_post_delelte = match[0]; // Extract the matched number
+        console.log(numberOfVendors_post_delelte);
+
+        expect(numberOfVendors).toBe(numberOfVendors_post_delelte);
+
+        await page.waitForTimeout(5000);
+        //show summary
+        await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
+        await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
+
+        const vendor_spend_element = await page.locator("//div[@role='navigation']//div//div[3]//div[1]//div[2]");
+
+    
+    const divs = await vendor_spend_element.locator('div'); // Get child divs
+
+    // Get the text content of the second child div
+    const secondDivTextContent = await divs.nth(1).textContent(); // nth(1) targets the second div (0-based index)
+
+    console.log(secondDivTextContent);
+        const vendor_spend_text = await vendor_spend_element.textContent(); 
+        console.log(vendor_spend_text);
 
     });
 
@@ -500,6 +571,13 @@ test ("Optimization" , async ({page}) => {
 
     await pageOptimization.goToOptimization();
 
+
+    //name validation
+    const OptimizationHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+    const text_optimization = await OptimizationHeadElement.textContent(); 
+    expect(text_optimization).toBe("Optimization Summary");
+
+    
     const savings_under_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
     
     const savings = parseFloat(savings_under_review_ele.replace(/[^\d.-]/g, ''));
@@ -513,52 +591,108 @@ test ("Optimization" , async ({page}) => {
 
     console.log(`Number of rows: ${rowCount}`);
 
-    // let sum=0;
-    // for(let i =0;i<rowCount;i++){
-    //     const rowValue = await rows.nth(i).locator('.optimization_summary_table_body').textContent(); // Replace 'td-value-selector' with the selector for the specific column containing the values
+    const headerRow = await page.$('//thead[@class="optimization_summary_table_head"]');
+if (headerRow) {
+    // Get all columns (th elements) within the header row
+    const columns = await headerRow.$$('th');
     
-    // // Check if rowValue is not null or empty
-    // if (rowValue) {
-    //     const numericValue = parseFloat(rowValue.replace(/[^\d.-]/g, '')); // Convert to number
-    //     sum += isNaN(numericValue) ? 0 : numericValue; // Add to total, ignore if NaN
-    // }
+    // Check if the number of columns is 8
+    if (columns.length === 9) {
+        console.log('The header has 9 columns.');
+    } else {
+        console.log(`The header has ${columns.length} columns.`);
+    }
+} else {
+    console.log('Header row not found.');
+}
+
+//Savings Under Review -calculation
 
     const rowss = await page.$$('tbody tr');
 
     let totalSum = 0;
-
+    
+    // Function to convert value to a number in thousands
+    function convertToThousands(value) {
+        // Remove the dollar sign and any commas
+        value = value.replace(/[$,]/g, '').trim();
+    
+        if (value.endsWith('k')) {
+            // Remove 'k' and convert to thousands
+            const numericValue = parseFloat(value.replace('k', ''));
+            return numericValue ? numericValue : 0; // Keep as is in thousands
+        }
+    
+        return parseFloat(value) / 1000 || 0; // Convert non-k values to thousands
+    }
+    
     // Iterate through each row
     for (const row of rowss) {
         // Get the value from the specified locator
-        const value = await row.$eval('td:nth-child(3) div', div => div.innerText);
-        
-        // Remove the $ sign and convert to number
-        const numericValue = parseFloat(value.replace(/[^\d.-]/g, '')); // Handle comma in numbers
-
-        // Add the value to the total sum if it's a valid number
-        if (!isNaN(numericValue)) {
-            totalSum += numericValue;
-        }
+        const value = await row.$eval('td:nth-child(3) div', div => div.innerText.trim());
+    
+        // Convert the value and add to total sum
+        const numericValue = convertToThousands(value);
+        totalSum += numericValue;
     }
-
-    console.log(totalSum);
+    
+    // Convert total sum to millions if it exceeds 1,000
+    let finalSum;
+    if (totalSum >= 1000) {
+        finalSum = totalSum / 1000; // Convert to millions
+        console.log(`Total sum in millions: ${finalSum.toFixed(2)}`);
+    } else {
+        console.log(`Total sum in thousands: ${totalSum.toFixed(2)}k`);
+    }
+    
+    //validation
 
     function areEqualUpToOneDecimal(num1, num2) {
         return num1.toFixed(1) === num2.toFixed(1);
     }
     
-    expect(savings.toFixed(1)).toBe(totalSum.toFixed(1));
-    console.log(areEqualUpToOneDecimal(totalSum, savings));  
+    expect(savings.toFixed(2)).toBe(finalSum.toFixed(2));
+    console.log(areEqualUpToOneDecimal(finalSum, savings));  
 
-    // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
+    //Estimated Savings Under review Calculation
 
-    // // check - 1
-    // await performCheck(page, regex, 1);
+    let totalSum_estimated_savings = 0;
+    
+    // Iterate through each row
+    for (const row of rowss) {
+        // Get the value from the specified locator
+        const value_estimated_savings = await row.$eval('td:nth-child(8) div', div => div.innerText.trim());
+    
+        // Convert the value and add to total sum
+        const numericValue1 = convertToThousands(value_estimated_savings);
+        totalSum_estimated_savings += numericValue1;
+    }
+    
+    // Convert total sum to millions if it exceeds 1,000
+    let finalSum_estimated_savings;
+    if (totalSum_estimated_savings >= 1000) {
+    finalSum_estimated_savings = totalSum_estimated_savings / 1000; // Convert to millions
+    console.log(`Total sum in millions: ${finalSum_estimated_savings.toFixed(2)}`);
+    } else {
+    finalSum_estimated_savings = totalSum_estimated_savings; // Keep it in thousands
+    console.log(`Total sum in thousands: ${finalSum_estimated_savings.toFixed(2)}k`);
+}
+    
+    
+    //reading header _estimated_savings
+    const estimated_savings_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
+    
+    const estimated_savings = parseFloat(estimated_savings_review_ele.replace(/[^\d.-]/g, ''));
+   // const savings_under_review_num = parseInt(savings_under_review, 10);
+    console.log(estimated_savings);
 
-    // await page.getByRole('button', { name: 'Optimization Optimization' }).click();
-    // // check 2
-    // await performCheck(page, regex, 2);
-
+    function areEqualUpToOneDecimal(num1, num2) {
+        return parseFloat(num1).toFixed(1) === parseFloat(num2).toFixed(1);
+    }
+    
+    console.log(areEqualUpToOneDecimal(finalSum_estimated_savings.toFixed(1), estimated_savings.toFixed(1)));
+     
+    
 });
 
 test("Spends" , async ({page}) => {
