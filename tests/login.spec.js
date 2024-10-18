@@ -392,7 +392,7 @@ test("Subscription without License" , async ({page}) => {
     });
 });
 
-    test("Renewals", async ({page}) => {
+test("Renewals", async ({page}) => {
         const Login = new LoginPage(page);
         await Login.goToLoginPage();
         await Login.login();
@@ -405,10 +405,42 @@ test("Subscription without License" , async ({page}) => {
         const text = await RenewalsHeadElement.textContent(); 
         expect(text).toBe("Renewals");
 
+        //GO TO GRID VIEW
         await page.locator("//button[@class='z__button is-active normal']").click();
 
+
+        //Selected month validation 
+        const slelected_month_name =await page.locator("//div[@class='block block__year flex-grow-1 d-inline-flex flex-wrap mr-3 ']//div[1]//div[1]//h4").textContent();
+        console.log(slelected_month_name);
+  
+        const [monthYear, amount] = slelected_month_name.split(/\s*\$\s*/);
+
+        // Clean up the month and year
+    const cleanedMonthYear = monthYear.trim();
+    const cleanedAmount = `$${amount.trim()}`; // Prepend the dollar sign
+
+    // Log the results
+    console.log(`Month and Year: ${cleanedMonthYear}`); // October' 24
+    console.log(`Amount: ${cleanedAmount}`); // $4.3M
+
+
+        const month_card_element = await page.locator("//div[@class='block block__month']//div[1]//div[1]//div[@class='font-18 bold-400'][1]").textContent();
+        console.log(month_card_element);
+
+        expect(cleanedMonthYear).toBe(month_card_element);
+        if(cleanedMonthYear === month_card_element){
+            console.log('The Selected Month Name,Year matches with the right pannel month name');
+        }
+
+        const monthcard_cost_element = await page.locator("//div[@class='block block__month']//div[1]//div[1]//div[2]//div[2]").textContent();
+        
+        if(cleanedAmount === monthcard_cost_element){
+            console.log(`The cost of the selected month card matches with the right pannel cost -> ${monthcard_cost_element}`);
+        }
+
+        
         //month card
-        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click()
+        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[1]").click()
         await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
         await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
 
@@ -417,7 +449,7 @@ test("Subscription without License" , async ({page}) => {
         expect(notification_message_renewal).toBe("Reminder successfully updated");
     });
 
-    test("Vendors", async ({page}) => {
+test("Vendors", async ({page}) => {
         const Login = new LoginPage(page);
         await Login.goToLoginPage();
         await Login.login();
@@ -431,16 +463,15 @@ test("Subscription without License" , async ({page}) => {
           
          
         expect(vendor_head_text).toBe("Vendors");
-
+        console.log("Hey!!, we are in VEDNORS page ");
 
         //initial vendor count
         const vendor_count_Element = await page.locator("//div[@class='mx-1']");
         const vendor_count_text = await vendor_count_Element.textContent(); 
-        console.log(vendor_count_text);
-
+        
         const match = vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
         const numberOfVendors = match[0]; // Extract the matched number
-        console.log(numberOfVendors); 
+        console.log(`The Initial Vendor count is ${numberOfVendors}`); 
 
 
         //add new vendor
@@ -466,9 +497,19 @@ test("Subscription without License" , async ({page}) => {
         await page.getByRole('button', { name: 'Add Vendor' }).click();
 
         await page.waitForTimeout(5000);
-            //verify the existance of the added vendor
-            await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").type(vendor_name);
-            await page.waitForTimeout(5000);
+
+
+        //intermediade vendor count
+        const intermediade_vendor_count_Element = await page.locator("//div[@class='mx-1']");
+        const intermediade_vendor_count_text = await intermediade_vendor_count_Element.textContent(); 
+
+        const intermediade_match = intermediade_vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
+        const intermediade_numberOfVendors = intermediade_match[0]; // Extract the matched number
+        console.log(`The intermediade Vendor count is ${intermediade_numberOfVendors}`); 
+        
+        //verify the existance of the added vendor
+        await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill(vendor_name);
+        await page.waitForTimeout(5000);
 
 
             //verify the vendor must exist
@@ -487,14 +528,14 @@ test("Subscription without License" , async ({page}) => {
             await page.waitForTimeout(4000);
             const vendor_count_Element_post_delelte = await page.locator("//div[@class='mx-1']");
             const vendor_count_text_post_delelte = await vendor_count_Element_post_delelte.textContent(); 
-            console.log(vendor_count_text_post_delelte);
+           
 
         const matched = vendor_count_text_post_delelte.match(/(\d+)/); // This will match the first sequence of digits
         const numberOfVendors_post_delelte = match[0]; // Extract the matched number
         console.log(numberOfVendors_post_delelte);
 
         expect(numberOfVendors).toBe(numberOfVendors_post_delelte);
-
+        console.log(`Vendor count post deletion ${vendor_count_text_post_delelte}`);
         await page.waitForTimeout(5000);
         //show summary
         await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
@@ -508,7 +549,7 @@ test("Subscription without License" , async ({page}) => {
     // Get the text content of the second child div
     const secondDivTextContent = await divs.nth(1).textContent(); // nth(1) targets the second div (0-based index)
 
-    console.log(secondDivTextContent);
+        console.log(secondDivTextContent);
         const vendor_spend_text = await vendor_spend_element.textContent(); 
         console.log(vendor_spend_text);
 
@@ -576,8 +617,58 @@ test ("Optimization" , async ({page}) => {
     const OptimizationHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
     const text_optimization = await OptimizationHeadElement.textContent(); 
     expect(text_optimization).toBe("Optimization Summary");
+    console.log(`Hey we are on ${text_optimization} page !!`);
 
+    //-----------------------------ON--PAGE----CURRENCY-----VALIDATION-----------------------------------------
+    async function checkSavingsElements(page) {
+        // Check the savings under review element
+        const savingsUnderReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
+        
+        // Validate that it starts with '$'
+        if (savingsUnderReviewEle.startsWith('$')) {
+            console.log('Savings under review Header-element starts with $');
+        } else {
+            console.log('Savings under review Header-element does not start with $');
+        }
     
+        // Check the estimated savings review element
+        const estimatedSavingsReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
+        
+        // Validate that it starts with '$'
+        if (estimatedSavingsReviewEle.startsWith('$')) {
+            console.log('Estimated savings review Header-element starts with $');
+        } else {
+            console.log('Estimated savings review Header-element does not start with $');
+        }
+    
+        // Get all rows in the table
+        const rows = await page.$$('tbody tr');
+        var row_number=1;
+        // Check each row for the specified conditions
+        for (const row of rows) {
+            // Check if the value in the 3rd child starts with '$'
+            const valueChild3 = await row.$eval('td:nth-child(3) div', div => div.innerText.trim());
+            if (valueChild3.startsWith('$')) {
+                console.log(`Savings under review cost for ROW-> ${row_number}, starts with $`);
+            } else {
+                console.log('Row child 3 does not start with $');
+            }
+    
+            // Check if the value in the 8th child starts with '$'
+            const valueChild8 = await row.$eval('td:nth-child(8) div', div => div.innerText.trim());
+            if (valueChild8.startsWith('$')) {
+                console.log(`Estimated Realized Savings cosT for ROW-> ${row_number}, starts with $`);
+            } else {
+                console.log('Row child 8 does not start with $');
+            }
+            row_number++;
+        }
+    }
+    
+    // Usage 
+    await checkSavingsElements(page);
+
+
     const savings_under_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
     console.log(savings_under_review_ele); // Example output: "$69.4"
     
@@ -699,10 +790,10 @@ if (headerRow) {
     } else {
     finalSum_estimated_savings = totalSum_estimated_savings; // Keep it in thousands
     console.log(`Total sum of Estimate savings in thousands: ${finalSum_estimated_savings}k`);
-}
-    
-    
+    }
+  
     //reading header _estimated_savings
+
     const estimated_savings_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
     
     const estimated_savings = parseFloat(estimated_savings_review_ele.replace(/[^\d.-]/g, ''));
@@ -712,13 +803,11 @@ if (headerRow) {
     function areEqualUpToOneDecimal(num1, num2) {
         return parseFloat(num1).toFixed(1) === parseFloat(num2).toFixed(1);
     }
-    
     console.log(areEqualUpToOneDecimal(finalSum_estimated_savings, estimated_savings));
 
-
-
     //function to click on i button and handle new page opening 
-async function validateNewPageHeading(page, buttonSelector, expectedHeading,elementclicked) {
+
+    async function validateNewPageHeading(page, buttonSelector, expectedHeading,elementclicked) {
     // Click the i button that opens a new page
     const [newPage] = await Promise.all([
         page.waitForEvent('popup'), // Wait for the new page to open
@@ -744,11 +833,47 @@ async function validateNewPageHeading(page, buttonSelector, expectedHeading,elem
     await newPage.close();
 }
 
-// Usage
+// function call
 await validateNewPageHeading(page, "(//div[@class='optimization_summary_meta_card'])[1]//div[2]//div[1]//div[1]", 'How Zluri Calculates Estimated Wastage & Savings?','Savings under review ');
 await validateNewPageHeading(page,  "(//div[@class='optimization_summary_meta_card'])[2]//div[2]//div[1]//div[1]",'How Zluri Calculates Estimated Wastage & Savings?','Estimated realized Savings');
 
    
+//app redirection validation 
+async function validateRowLinks(page) {
+    const rows = await page.$$('tbody tr'); // Get all rows
+    let rowNumber = 1; // Initialize row number
+
+    // Check each row for the specified conditions
+    for (const row of rows) {
+        // Get the text from the specified locator
+        const valueApp = await row.$eval('td:nth-child(2) div div div', div => div.innerText.trim());
+        console.log(`Row ${rowNumber} app-name value: ${valueApp}`);
+
+        // Click on the text to open the new page by using a more specific locator within the row context
+        await page.locator('div.d-flex div.optimization_summary_app_cell div:has-text("' + valueApp + '")').click();
+
+        await page.waitForTimeout(3000);
+        // Read the text at the specified locator on the new page
+        const breadcrumbText = await page.locator("//div[@class='ins-1']//nav//ol//li[1]//div[@class='truncate_breadcrumb_item_name']").textContent();
+
+        // Validate with the previous page name
+        if (breadcrumbText.trim() === valueApp) {
+            console.log(`Validation successful for Row ${rowNumber}: '${breadcrumbText}' matches '${valueApp}'`);
+        } else {
+            console.log(`Validation failed for Row ${rowNumber}: '${breadcrumbText}' does not match '${valueApp}'`);
+        }
+        rowNumber++;
+        await page.goBack();
+        await page.waitForLoadState('load');            
+     }
+    }
+
+    // function call
+    await validateRowLinks(page);    
+
+//cross validation with optimization page cost --->>> in app optimizatio cost
+
+
 });
 
 test("Spends" , async ({page}) => {
