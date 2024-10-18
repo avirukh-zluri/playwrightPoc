@@ -1,4 +1,5 @@
 const { expect } = require('@playwright/test');
+import { disconnect } from 'process';
 import { setTimeout } from 'timers/promises';
 
 
@@ -6,6 +7,7 @@ export class LicensePage{
     constructor(page){
         this.page = page;
         this.clickOnLicenses = "//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]";
+        this.clickOnLicenses2 = " //button[@class='sidebar__item sidebar__list-upper__interiorbutton btn btn-primary']//span[contains(text(),'Licenses')]";
         this.clickOnSubscriptions = "//a[@href='/licenses#allSubscriptions']";
         this.clickOnContracts = "//a[@href='/licenses#allContracts']";
         this.clickOnPerpetual = "//a[@href='/licenses#allPerpetualContracts']";
@@ -16,6 +18,10 @@ export class LicensePage{
         this.clickOnAdd = "//button[@class='appsad mr-3']";
         // Proper xpath needed
         //this.defaultName = "div[class='plan__header__wrapper card'] div:nth-child(4)";
+
+        this.newLicenseNameButtton = "//img[@class='ml-2 cursor-pointer']";
+        this.clickToAddNewLicenseName = "//input[@value='Untitled']";
+        this.clickToAddName = "//div[@class='d-flex align-items-center pl-2']//img[1]";
 
         this.contractAppName = "//input[@placeholder='Enter App Name']";
         this.clickToSelectApp = "//div[@class='row suggestion_menu_application_name_row']";
@@ -74,12 +80,17 @@ export class LicensePage{
         this.clickOnDropDownRenewalTerms = "//select[@class='recurring_interval_dropdown form-control text-capitalize']";
         this.clickOnNext4 = "//div[@class='d-flex flex-column']//button[@class='z__button mt-4'][normalize-space()='Next']";
         this.clickOnNext5 = "(//button[@class='z__button mt-4'][normalize-space()='Next'])[2]";
+        this.clickToAddBasePrice = "//input[@class='form-check-input position-static']";
+        this.addBasePrice = "//input[@placeholder='Add Base Price']";
+        this.addOneTimeFee = "//div[@class='stepper__step__card active card']//div[@class='d-flex flex-wrap']//div[2]";
+        this.addFee = "//input[@placeholder='Enter Amount']";
         this.clickToAddLicense = "//div[@class='add_license_button']";
-        this.clickToEnterLicenseName = "//input[@placeholder='Enter Name']";
+        this.clickToEnterLicenseName = "//div[@class='d-flex mb-0 form-group']//input[@placeholder='Enter Name']";
         this.addCost = "//input[@placeholder='Cost']";
         this.clickToAddTenure = "//select[@class='form-control']";
         this.addLicenseDescription = "//input[@placeholder='Enter Description']";
         this.addQuantity = "//input[@placeholder='Enter Quantity']";
+        this.addDiscount = "//input[@placeholder='Discount']";
         this.clickToSaveLicense = "//button[normalize-space()='Save']";
         this.clickOnNext6 = "(//button[@class='z__button undefined'])[1]";
         this.clickToAddSubscription = "(//button[normalize-space()='Add subscription'])[1]";
@@ -88,13 +99,37 @@ export class LicensePage{
         // Create Perpetuals 
         this.clickToAddPerpetuals = "//button[normalize-space()='Add Perpetual Contract']";
         this.goBackToPerpetualPage = "//button[normalize-space()='Perpetuals']";
+
+        // Vendor Count
+        this.vendorCount = "tbody tr:nth-child(1) td:nth-child(5)";
     }
 
     async goToLicenses(){
         await this.page.locator(this.clickOnLicenses).click();
     }
+
+    async checkCountOfTheContractt(vendorData){
+        console.log('vendorData:', vendorData);
+        if (!vendorData || typeof vendorData !== 'object') {
+            throw new Error('vendorData must be a non-null object');
+        }
+        const { vendorName } = vendorData;
+        console.log('vendorName:', vendorName);
+        if (vendorName === undefined) {
+            throw new Error('vendorName is missing from vendorData');
+        }
+        if (typeof vendorName !== 'string') {
+            throw new Error('vendorName must be a string');
+        }
+        await this.page.locator(this.clickOnSearch).fill(vendorName);
+        await this.page.waitForTimeout(5000); 
+        const count = await this.page.locator(this.vendorCount).textContent();
+        return count;
+    }
+
     async createContract(licensesData){
         const {
+            newName,
             appName,
             descName,
             vendorName,
@@ -102,16 +137,40 @@ export class LicensePage{
             financeOwner,
             ItOwner,
             negotiationOwner,
+            basePrice,
+            oneTimeFee,
             licenseName,
             cost,
             tenure,
+            discount,
             descriptionLicense,
             quantity
         } = licensesData;
+
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor before creating a contract:`, count);
+        }
+
         const baseURLFE = process.env.BASE_URL_FE;
+        if(vendorName){
+            await this.page.locator(this.clickOnLicenses2).click();
+        }
         await this.page.locator(this.clickOnContracts).click();
+        
 
         await this.page.locator(this.clickOnAdd).click();
+
+        await this.page.locator(this.newLicenseNameButtton).click();
+        await this.page.locator(this.clickToAddNewLicenseName).click();
+        await this.page.locator(this.clickToAddNewLicenseName).clear();
+        await this.page.getByRole('textbox').first().fill(newName);
+        // await this.page.locator(this.clickToAddNewLicenseName).first().fill(newName);
+        await this.page.locator(this.clickToAddName).click();
+        
 
         //Url Check 
         const currentUrl = this.page.url();
@@ -166,8 +225,10 @@ export class LicensePage{
         // Description
         await this.page.locator(this.description).fill(descName);
         // Vendor Name
-        await this.page.locator(this.fillVendorName).fill(vendorName);
-        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        if(vendorName){
+            await this.page.locator(this.fillVendorName).fill(vendorName);
+            await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        }
         // Primary Owner
         await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
         await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
@@ -183,7 +244,7 @@ export class LicensePage{
         // Start Date
         await this.page.locator(this.clickOnStartDate).click();
         await this.page.locator(this.startDate).click();
-        console.log(this.startDate);
+        // console.log(this.startDate);
 
         // xpath needed
         // const defaultContractNameAfterStartDate = await this.page.locator(this.defaultName).inputValue();
@@ -201,9 +262,17 @@ export class LicensePage{
         await this.page.locator(this.clickOnNext1).click();
         await this.page.locator(this.clickOnNext2).click();
 
-        if (licenseName && cost && tenure && descriptionLicense && quantity) {
+        if (licenseName && cost && tenure && descriptionLicense && quantity && discount && oneTimeFee && basePrice) {
             // Add License
-            await this.page.locator(this.clickToAddLicense).click();
+            if(basePrice){
+                await this.page.locator(this.clickToAddBasePrice).check();
+                await this.page.locator(this.addBasePrice).fill(basePrice);
+            }
+            if(oneTimeFee){
+                await this.page.locator(this.addOneTimeFee).click();
+                await this.page.locator(this.addFee).fill(oneTimeFee);
+            }
+            await this.page.locator(this.clickToAddLicense).click();  
             if (licenseName) {
                 await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
             }
@@ -219,6 +288,9 @@ export class LicensePage{
             }
             if (quantity) {
                 await this.page.locator(this.addQuantity).fill(quantity);
+            }
+            if(discount){
+                await this.page.locator(this.addDiscount).fill(discount)
             }
             await this.page.locator(this.clickToSaveLicense).click();
         }
@@ -238,14 +310,26 @@ export class LicensePage{
         const expectedFinanceOwnerName = await this.page.locator(this.financeOwnerNameValidation).textContent();
 
         expect(appName.toLowerCase()).toEqual(expectedAppName.toLowerCase());
-        expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        if(vendorName){
+            expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        }
         expect(primaryOwner.toLowerCase()).toEqual(expectedPrimaryOwnerName.toLowerCase());
         expect(financeOwner.toLowerCase()).toEqual(expectedFinanceOwnerName.toLowerCase());
+
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor after contract is created:`, count);
+        }
+        
         
     }
 
     async createSubscription (licensesData){
         const {
+            newName,
             appName,
             descName,
             vendorName,
@@ -255,14 +339,24 @@ export class LicensePage{
             negotiationOwner,
             renewalTermValue,
             renewalTerm,
+            basePrice,
+            oneTimeFee,
             licenseName,
             cost,
             tenure,
+            discount,
             descriptionLicense,
             quantity
         } = licensesData;
         await this.page.locator(this.clickOnSubscriptions).click();
         await this.page.locator(this.clickOnAdd).click();
+
+        await this.page.locator(this.newLicenseNameButtton).click();
+        await this.page.locator(this.clickToAddNewLicenseName).click();
+        await this.page.locator(this.clickToAddNewLicenseName).clear();
+        await this.page.getByRole('textbox').first().fill(newName);
+        // await this.page.locator(this.clickToAddNewLicenseName).first().fill(newName);
+        await this.page.locator(this.clickToAddName).click();
 
         //Url Check 
         const baseURLFE = process.env.BASE_URL_FE;
@@ -332,9 +426,16 @@ export class LicensePage{
         await this.page.locator(this.clickOnNext5).click();
 
         // Add License
-        if (licenseName && cost && tenure && descriptionLicense && quantity) {
+        if (licenseName && cost && tenure && descriptionLicense && quantity && discount && oneTimeFee && basePrice) {
+            if(basePrice){
+                await this.page.locator(this.clickToAddBasePrice).check();
+                await this.page.locator(this.addBasePrice).fill(basePrice);
+            }
+            if(oneTimeFee){
+                await this.page.locator(this.addOneTimeFee).click();
+                await this.page.locator(this.addFee).fill(oneTimeFee);
+            }
             await this.page.locator(this.clickToAddLicense).click();
-        
             if (licenseName) {
                 await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
             }
@@ -350,6 +451,9 @@ export class LicensePage{
             }
             if (quantity) {
                 await this.page.locator(this.addQuantity).fill(quantity);
+            }
+            if(discount){
+                await this.page.locator(this.addDiscount).fill(discount)
             }
             await this.page.locator(this.clickToSaveLicense).click();
             
@@ -377,6 +481,7 @@ export class LicensePage{
     }
     async createPerpetuals(licensesData){
         const {
+            newName,
             appName,
             descName,
             vendorName,
@@ -384,14 +489,22 @@ export class LicensePage{
             financeOwner,
             ItOwner,
             negotiationOwner,
+            oneTimeFee,
             licenseName,
             cost,
-            tenure,
+            discount,
             descriptionLicense,
             quantity
         } = licensesData;
         await this.page.locator(this.clickOnPerpetual).click();
         await this.page.locator(this.clickOnAdd).click();
+
+        await this.page.locator(this.newLicenseNameButtton).click();
+        await this.page.locator(this.clickToAddNewLicenseName).click();
+        await this.page.locator(this.clickToAddNewLicenseName).clear();
+        await this.page.getByRole('textbox').first().fill(newName);
+        // await this.page.locator(this.clickToAddNewLicenseName).first().fill(newName);
+        await this.page.locator(this.clickToAddName).click();
 
         //Url Check 
         const baseURLFE = process.env.BASE_URL_FE;
@@ -462,7 +575,11 @@ export class LicensePage{
         await this.page.locator(this.clickOnNext5).click();
 
         // Add License
-        if (licenseName && cost && tenure && descriptionLicense && quantity) {
+        if (licenseName && cost && descriptionLicense && quantity && discount && oneTimeFee ) {
+            if(oneTimeFee){
+                await this.page.locator(this.addOneTimeFee).click();
+                await this.page.locator(this.addFee).fill(oneTimeFee);
+            }
             await this.page.locator(this.clickToAddLicense).click();
             if (licenseName) {
                 await this.page.locator(this.clickToEnterLicenseName).fill(licenseName);
@@ -470,15 +587,14 @@ export class LicensePage{
             if (cost) {
                 await this.page.locator(this.addCost).fill(cost);
             }
-            if (tenure) {
-                // Locator needs to be improved 
-                await this.page.locator('div').filter({ hasText: /^per termper monthper quarterper year$/ }).getByRole('combobox').selectOption(tenure);
-            }
             if (descriptionLicense) {
                 await this.page.locator(this.addLicenseDescription).fill(descriptionLicense);
             }
             if (quantity) {
                 await this.page.locator(this.addQuantity).fill(quantity);
+            }
+            if(discount){
+                await this.page.locator(this.addDiscount).fill(discount)
             }
             await this.page.locator(this.clickToSaveLicense).click();
         }
@@ -507,4 +623,5 @@ export class LicensePage{
     async navigateVendors(){
         await this.page.locator(this.clickOnVendors).click();
     }
+    
 }

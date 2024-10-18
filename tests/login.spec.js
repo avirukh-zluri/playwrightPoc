@@ -42,18 +42,25 @@ test('Contract with License', async ( {page} ) => {
     await Login.goToLoginPage();
     await Login.login();
     const license = new LicensePage(page);
+    
+
+
     await license.goToLicenses();
     await license.createContract({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Notion",
+        // vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
         negotiationOwner:"Jocker",
+        basePrice:"0",
+        oneTimeFee:"0",
         licenseName:"Pro",
         cost:"1000",
         tenure:"months",
+        discount:"0",
         descriptionLicense:"Demo",
         quantity:"1000"
     });
@@ -66,6 +73,24 @@ test('Contract without License', async ( {page} ) => {
     const license = new LicensePage(page);
     await license.goToLicenses();
     await license.createContract({
+        newName:"Test",
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+    });
+});
+
+test('Contract with Vendor Validation and without License' , async ({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    await license.createContract({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -74,7 +99,7 @@ test('Contract without License', async ( {page} ) => {
         ItOwner:"Jocker",
         negotiationOwner:"Jocker",
     });
-});
+})
 
 test("Application " , async  ( {page} ) => {
     
@@ -296,6 +321,7 @@ test("Subscription with License" , async ({page}) => {
     await pageLicenses.goToLicenses();
     // Create Subscription
     await pageLicenses.createSubscription({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -305,9 +331,12 @@ test("Subscription with License" , async ({page}) => {
         negotiationOwner:"Jocker",
         renewalTermValue: "5" ,
         renewalTerm:"Years",
+        basePrice:"0",
+        oneTimeFee:"0",
         licenseName:"Pro",
         cost:"1000",
         tenure:"months",
+        discount:"0",
         descriptionLicense:"Demo",
         quantity:"1000"
     });
@@ -323,6 +352,7 @@ test("Subscription without License" , async ({page}) => {
     await pageLicenses.goToLicenses();
     // Create Subscription
     await pageLicenses.createSubscription({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -348,6 +378,7 @@ test("Perpetual With License" , async({page}) => {
     await pageLicenses.goToLicenses();
     // Create Perpetuals
     await pageLicenses.createPerpetuals({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -355,9 +386,11 @@ test("Perpetual With License" , async({page}) => {
         financeOwner:"Jocker",
         ItOwner:"Jocker",
         negotiationOwner:"Jocker",
+        basePrice:"0",
+        oneTimeFee:"0",
         licenseName:"Pro",
         cost:"1000",
-        tenure:"months",
+        discount:"0",
         descriptionLicense:"Demo",
         quantity:"1000"
     });
@@ -373,6 +406,7 @@ test("Perpetual Without License" , async({page}) => {
     await pageLicenses.goToLicenses();
     // Create Perpetuals
     await pageLicenses.createPerpetuals({
+        newName:"Test",
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -745,4 +779,30 @@ test("Task" , async ({page}) => {
     // await page.getByRole('button', { name: 'Tasks Tasks' }).click();
     // // check - 1
     // await performCheck(page, regex, 17);
+});
+
+test("Delete palybook" , async({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    const application = new Application(page);
+    await application.goToApplication();
+    await application.goToAllApp();
+    await application.deletePlaybook({
+        name:"Asana"
+    });
+});
+test("Create Playbook" , async({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    const application = new Application(page);
+    application.goToApplication();
+    await application.goToAllApp();
+    await application.addPlaybookForApp({
+        name : "Asana",
+        actionName : "Create A Manual Task",
+        playbookActionName : "Add a user to application"
+    });
+    
 });

@@ -13,18 +13,13 @@ export class LoginPage {
     }
 
     async goToLoginPage(page){
-        await this.page.goto('https://app.zluri.com/login');
+        await this.page.goto('https://app.zluri.dev/login');
     }
-    async login (slugData){
-        // const {
-        //     slug
-        // } = slugData;
-        await this.page.locator(this.enterEmail).fill('pod4_automation_prod@zluri.dev');
+    async login (page){
+        await this.page.locator(this.enterEmail).fill('zluri_newdev_user4@zluri.dev');
         await this.page.locator(this.button).click();
-        // if(slug){
-        //     await this.page.locator(this.enterSlug).fill(slug)
-        //     await this.page.locator(this.clickOnSubmit).click();
-        // }
+        await this.page.locator(this.enterSlug).fill('testtemplate-6')
+        await this.page.locator(this.clickOnSubmit).click();
         await this.page.locator(this.enterPassword).fill('test@123');
         await this.page.locator(this.continueButton).click();
     }
