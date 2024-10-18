@@ -90,6 +90,6 @@ export class SignUpPage {
         await this.page.locator(this.enterCompany).fill(company);
 
         await this.page.locator(this.enterNumber).fill(phoneNumber);
-        // await this.page.locator(this.requestInvite).click();
+        await this.page.locator(this.requestInvite).click();
     }
 };

@@ -37,7 +37,7 @@ async function performCheck(page, regex, checkNumber) {
 test.describe.configure({ mode: 'parallel' });
 
 
-test('Licenses Contract', async ( {page} ) => { 
+test('Contract with License', async ( {page} ) => { 
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
@@ -56,6 +56,23 @@ test('Licenses Contract', async ( {page} ) => {
         tenure:"months",
         descriptionLicense:"Demo",
         quantity:"1000"
+    });
+});
+
+test('Contract without License', async ( {page} ) => { 
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    await license.createContract({
+        appName:"Asana",
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
     });
 });
 
@@ -268,7 +285,7 @@ test("Directory" , async ({page}) => {
     // await performCheck(page, regex, 8);
 });
 
-test("Licenses Subscription" , async ({page}) => {
+test("Subscription with License" , async ({page}) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
@@ -295,10 +312,32 @@ test("Licenses Subscription" , async ({page}) => {
         quantity:"1000"
     });
 });
+test("Subscription without License" , async ({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const pageLicenses = new LicensePage(page);
+    
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    // Create Subscription
+    await pageLicenses.createSubscription({
+        appName:"Asana",
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
+});
 
 
 
-test("License Perpetuals" , async({page}) => {
+test("Perpetual With License" , async({page}) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login();
@@ -321,6 +360,26 @@ test("License Perpetuals" , async({page}) => {
         tenure:"months",
         descriptionLicense:"Demo",
         quantity:"1000"
+    });
+
+});
+
+test("Perpetual Without License" , async({page}) => {
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const pageLicenses = new LicensePage(page);
+    await pageLicenses.goToLicenses();
+    // Create Perpetuals
+    await pageLicenses.createPerpetuals({
+        appName:"Asana",
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
     });
 
 });
@@ -454,6 +513,7 @@ test("Access review" , async ({page}) => {
     // await pageAccessReviews.archieveCert();
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();
+
     // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
     // // check - 1
     // await performCheck(page, regex, 1);
