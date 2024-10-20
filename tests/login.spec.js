@@ -147,29 +147,34 @@ test("Directory" , async ({page}) => {
     const head_emp_count_text = await userHead_employee_count.textContent(); 
     const head_emp_count = parseInt(head_emp_count_text, 10);
 
+
+     // Wait for the table body to be visible
+     const tableBodyLocator = page.locator('tbody'); 
+     await tableBodyLocator.waitFor(); 
     //employee list length vaidation
     // Scroll to the bottom of the table
     const tableHandle = await page.$("#scrollRoot");
-    const rowSelector = `${"#scrollRoot"} tr`;
+   // const rowSelector = `${"#scrollRoot"} tr`;
     
     let previousRowCount = 0;
+    let currentRowCount=0;
 
     while (true) {
-        // Scroll down
-        await tableHandle.evaluate(element => {
-            element.scrollTop = element.scrollHeight;
+         // Scroll the container directly
+         await tableHandle.evaluate(element => {
+            element.scrollTop += 300; // Adjust this value as needed
         });
-        
-        // Wait for new rows to load (if applicable)
-        await page.waitForTimeout(5000); // Adjust timeout as necessary
-        
-        // Count the current number of rows
-        const rows = await page.$$eval(rowSelector, rows => rows.length);
-        
+
+        // Wait for a moment to allow new rows to load
+        await page.waitForTimeout(1000); // Adjust based on your application's loading speed
+
+        // Get the current number of rows
+        currentRowCount = await tableBodyLocator.locator('tr').count();
+
         // Check if we reached the end
-        if (rows === previousRowCount) break;
+        if (currentRowCount === previousRowCount) break;
         
-        previousRowCount = rows;
+        previousRowCount = currentRowCount;
     }
     
     // Final count of rows
@@ -178,7 +183,53 @@ test("Directory" , async ({page}) => {
     
     
     console.log(`Total rows: ${initial_totalRows}`);
+//new
+    const tableBodyLocator_user = page.locator('//tbody'); // Use the appropriate selector
+    const rows_user = await tableBodyLocator_user.locator('tr'); // Select all rows within the table body
+    const rowCount_user = await rows_user.count(); // Get the number of rows
 
+    console.log(`Number of rows user: ${rowCount_user}`);
+//AV
+
+async function scrollThroughDynamicElements(page, selector, maxScrolls = 10) {
+    let previousElementCount = 0;
+    let scrollCount = 0;
+    let noNewElementsCount = 0;
+    while (scrollCount < maxScrolls) {
+      // Get all current elements
+      const elements = await page.$$("(//tr[@class='table__row undefined'])");
+      // If no new elements loaded in the last 3 scrolls, break the loop
+      if (elements.length === previousElementCount) {
+        noNewElementsCount++;
+        if (noNewElementsCount >= 3) break;
+      } else {
+        noNewElementsCount = 0;
+      }
+      // Process new elements
+      for (let i = previousElementCount; i < elements.length; i++) {
+        const element = elements[i];
+        await element.scrollIntoViewIfNeeded();
+        // Optional: Add a small delay
+        await page.waitForTimeout(500);
+        // Optional: Perform actions on the element
+        // For example: await element.click();
+        // Optional: Log the current element
+        console.log('Processed element:', await element.evaluate(el => el.textContent));
+      }
+      // Scroll to the last element to trigger loading more
+      if (elements.length > 0) {
+        await elements[elements.length - 1].scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000); // Wait for potential new elements to load
+      }
+      previousElementCount = elements.length;
+      scrollCount++;
+      console.log(`Scroll ${scrollCount}: Processed ${elements.length} elements`);
+    }
+    console.log(`Finished scrolling. Total elements processed: ${previousElementCount}`);
+  }
+  
+
+  
     //new to be corrected
    // expect(head_emp_count).toBe(initial_totalRows)
 
@@ -237,13 +288,19 @@ test("Directory" , async ({page}) => {
 
     expect(post_head_emp_count).toBe(head_emp_count + 1)
 
+  //search the added user
+    await page.locator("//input[@placeholder='Search']").fill(employee_name);
+    await page.waitForTimeout(5000);
+    const user_list_name_ele = await page.locator("//div[@class='truncate_10vw text-capitalize']");
+    const user_list_name = await user_list_name_ele.textContent(); 
+    expect(user_list_name).toBe(employee_name);
 
 
 
     await pageDirectory.navigateUsers();
 
     // Department 
-    await pageDirectory.navigateDepartment();
+   // await pageDirectory.navigateDepartment();
 
     // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
 
@@ -279,7 +336,7 @@ test("Directory" , async ({page}) => {
     // // check - 7
     // await performCheck(page, regex, 7);
 
-                             // Department
+     // Department
     // await page.getByRole('button', { name: 'Departments Departments' }).click();
     //  // check - 8
     // await performCheck(page, regex, 8);
@@ -335,6 +392,168 @@ test("Subscription without License" , async ({page}) => {
     });
 });
 
+test("Renewals", async ({page}) => {
+        const Login = new LoginPage(page);
+        await Login.goToLoginPage();
+        await Login.login();
+
+        await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
+        await page.locator("//span[normalize-space()='Renewals']").click();
+
+        //name validation
+        const RenewalsHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+        const text = await RenewalsHeadElement.textContent(); 
+        expect(text).toBe("Renewals");
+
+        //GO TO GRID VIEW
+        await page.locator("//button[@class='z__button is-active normal']").click();
+
+
+        //Selected month validation 
+        const slelected_month_name =await page.locator("//div[@class='block block__year flex-grow-1 d-inline-flex flex-wrap mr-3 ']//div[1]//div[1]//h4").textContent();
+        console.log(slelected_month_name);
+  
+        const [monthYear, amount] = slelected_month_name.split(/\s*\$\s*/);
+
+        // Clean up the month and year
+    const cleanedMonthYear = monthYear.trim();
+    const cleanedAmount = `$${amount.trim()}`; // Prepend the dollar sign
+
+    // Log the results
+    console.log(`Month and Year: ${cleanedMonthYear}`); // October' 24
+    console.log(`Amount: ${cleanedAmount}`); // $4.3M
+
+
+        const month_card_element = await page.locator("//div[@class='block block__month']//div[1]//div[1]//div[@class='font-18 bold-400'][1]").textContent();
+        console.log(month_card_element);
+
+        expect(cleanedMonthYear).toBe(month_card_element);
+        if(cleanedMonthYear === month_card_element){
+            console.log('The Selected Month Name,Year matches with the right pannel month name');
+        }
+
+        const monthcard_cost_element = await page.locator("//div[@class='block block__month']//div[1]//div[1]//div[2]//div[2]").textContent();
+        
+        if(cleanedAmount === monthcard_cost_element){
+            console.log(`The cost of the selected month card matches with the right pannel cost -> ${monthcard_cost_element}`);
+        }
+
+        
+        //month card
+        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[1]").click()
+        await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
+        await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
+
+        const notification_message_renewal_ele = await page.locator("//div[@class='notification_title']");
+        const  notification_message_renewal= await notification_message_renewal_ele.textContent(); 
+        expect(notification_message_renewal).toBe("Reminder successfully updated");
+    });
+
+test("Vendors", async ({page}) => {
+        const Login = new LoginPage(page);
+        await Login.goToLoginPage();
+        await Login.login();
+        await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
+        await page.locator("//span[normalize-space()='Vendors']").click();
+
+        await page.waitForTimeout(5000);
+        //name validation
+        const vendorHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+        const vendor_head_text = await vendorHeadElement.evaluate(el => el.childNodes[0].textContent.trim());
+          
+         
+        expect(vendor_head_text).toBe("Vendors");
+        console.log("Hey!!, we are in VEDNORS page ");
+
+        //initial vendor count
+        const vendor_count_Element = await page.locator("//div[@class='mx-1']");
+        const vendor_count_text = await vendor_count_Element.textContent(); 
+        
+        const match = vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
+        const numberOfVendors = match[0]; // Extract the matched number
+        console.log(`The Initial Vendor count is ${numberOfVendors}`); 
+
+
+        //add new vendor
+        await page.getByRole('button', { name: 'Add' }).click();
+
+        var randomnum=Math.floor(Math.random()*(999-100+1)+100);
+        var vendor_name="TestVendor"+randomnum;
+        await page.locator("//input[@placeholder='Vendor Name']").fill(vendor_name);
+        await page.locator("[aria-placeholder='Add Category']").fill("test");
+        await page.locator("//input[@placeholder='Add Owner']").fill("san");
+        await page.locator("(//div[@class='s-menu-container shadow-sm mt-1 undefined']//div[1]//button//div[2]//div//div)").click();
+        await page.locator("//input[@placeholder='Website']").fill("www.zluri.com");
+
+        await page.locator("//img[@class='contact_delete_icon cursor-pointer']").click();
+        //scroll to view
+        //await page.getByText('Phone Number').scrollIntoViewIfNeeded();
+        
+        // await page.locator("//input[@placeholder='Name']").fill(vendor_name);
+        // await page.locator("//input[@placeholder='Job Title']").fill("test");
+        // await page.locator("//input[@placeholder='Country code']").fill(+91);
+        // await page.locator("//input[@placeholder='Phone Number']").fill("123456789");
+        // await page.locator("//input[@placeholder='Email']").fill("enteremail@gmail.com");
+        await page.getByRole('button', { name: 'Add Vendor' }).click();
+
+        await page.waitForTimeout(5000);
+
+
+        //intermediade vendor count
+        const intermediade_vendor_count_Element = await page.locator("//div[@class='mx-1']");
+        const intermediade_vendor_count_text = await intermediade_vendor_count_Element.textContent(); 
+
+        const intermediade_match = intermediade_vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
+        const intermediade_numberOfVendors = intermediade_match[0]; // Extract the matched number
+        console.log(`The intermediade Vendor count is ${intermediade_numberOfVendors}`); 
+        
+        //verify the existance of the added vendor
+        await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill(vendor_name);
+        await page.waitForTimeout(5000);
+
+
+            //verify the vendor must exist
+            // const vendor_row_ele = await page.locator("(//tbody//tr//td[2]//div//a[@class='.table-link.truncate_10vw']")
+            // const vendor_name_list = await vendor_row_ele.textContent();
+            // console.log(vendor_name_list);
+
+            //Delete the Added Vendor
+            await page.locator("//input[@id='preventRowClick']").click();
+            await page.waitForTimeout(2000);
+            await page.locator("//div[@class='Uploads__right']//div[1]//a[@class='cursor-pointer autho__dd__cont ml-3 mt-auto mb-auto text-decoration-none']//div").click();
+            await page.locator("//a[normalize-space()='Delete Vendors']").click();
+            await page.waitForTimeout(4000);
+
+            await page.reload();
+            await page.waitForTimeout(4000);
+            const vendor_count_Element_post_delelte = await page.locator("//div[@class='mx-1']");
+            const vendor_count_text_post_delelte = await vendor_count_Element_post_delelte.textContent(); 
+           
+
+        const matched = vendor_count_text_post_delelte.match(/(\d+)/); // This will match the first sequence of digits
+        const numberOfVendors_post_delelte = match[0]; // Extract the matched number
+        console.log(numberOfVendors_post_delelte);
+
+        expect(numberOfVendors).toBe(numberOfVendors_post_delelte);
+        console.log(`Vendor count post deletion ${vendor_count_text_post_delelte}`);
+        await page.waitForTimeout(5000);
+        //show summary
+        await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
+        await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
+
+        const vendor_spend_element = await page.locator("//div[@role='navigation']//div//div[3]//div[1]//div[2]");
+
+    
+    const divs = await vendor_spend_element.locator('div'); // Get child divs
+
+    // Get the text content of the second child div
+    const secondDivTextContent = await divs.nth(1).textContent(); // nth(1) targets the second div (0-based index)
+
+        console.log(secondDivTextContent);
+        const vendor_spend_text = await vendor_spend_element.textContent(); 
+        console.log(vendor_spend_text);
+
+    });
 
 
 test("Perpetual With License" , async({page}) => {
@@ -393,14 +612,267 @@ test ("Optimization" , async ({page}) => {
 
     await pageOptimization.goToOptimization();
 
-    // const regex = /something\s*went\s*wrong\s*[^\w\s]?/i;
 
-    // // check - 1
-    // await performCheck(page, regex, 1);
+    //name validation
+    const OptimizationHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
+    const text_optimization = await OptimizationHeadElement.textContent(); 
+    expect(text_optimization).toBe("Optimization Summary");
+    console.log(`Hey we are on ${text_optimization} page !!`);
 
-    // await page.getByRole('button', { name: 'Optimization Optimization' }).click();
-    // // check 2
-    // await performCheck(page, regex, 2);
+    //-----------------------------ON--PAGE----CURRENCY-----VALIDATION-----------------------------------------
+    async function checkSavingsElements(page) {
+        // Check the savings under review element
+        const savingsUnderReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
+        
+        // Validate that it starts with '$'
+        if (savingsUnderReviewEle.startsWith('$')) {
+            console.log('Savings under review Header-element starts with $');
+        } else {
+            console.log('Savings under review Header-element does not start with $');
+        }
+    
+        // Check the estimated savings review element
+        const estimatedSavingsReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
+        
+        // Validate that it starts with '$'
+        if (estimatedSavingsReviewEle.startsWith('$')) {
+            console.log('Estimated savings review Header-element starts with $');
+        } else {
+            console.log('Estimated savings review Header-element does not start with $');
+        }
+    
+        // Get all rows in the table
+        const rows = await page.$$('tbody tr');
+        var row_number=1;
+        // Check each row for the specified conditions
+        for (const row of rows) {
+            // Check if the value in the 3rd child starts with '$'
+            const valueChild3 = await row.$eval('td:nth-child(3) div', div => div.innerText.trim());
+            if (valueChild3.startsWith('$')) {
+                console.log(`Savings under review cost for ROW-> ${row_number}, starts with $`);
+            } else {
+                console.log('Row child 3 does not start with $');
+            }
+    
+            // Check if the value in the 8th child starts with '$'
+            const valueChild8 = await row.$eval('td:nth-child(8) div', div => div.innerText.trim());
+            if (valueChild8.startsWith('$')) {
+                console.log(`Estimated Realized Savings cosT for ROW-> ${row_number}, starts with $`);
+            } else {
+                console.log('Row child 8 does not start with $');
+            }
+            row_number++;
+        }
+    }
+    
+    // Usage 
+    await checkSavingsElements(page);
+
+
+    const savings_under_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
+    console.log(savings_under_review_ele); // Example output: "$69.4"
+    
+    // Function to convert savings based on its format
+    function convertSavings(value) {
+        value = value.trim();
+    
+        // Check if the value starts with '$'
+        if (value.startsWith('$')) {
+            value = value.slice(1); // Remove the dollar sign
+        }
+    
+        if (value.endsWith('k')) {
+            // Remove 'k' and parse as thousands
+            return parseFloat(value.replace('k', '').trim()) || 0; // Keep as is in thousands
+        } else if (value.endsWith('M')) {
+            // Remove 'M' and convert to thousands
+            return parseFloat(value.replace('M', '').trim()) * 1000 || 0; // Convert millions to thousands
+        }
+    
+        // Convert any other value to thousands
+        return parseFloat(value) / 1000 || 0; // Convert non-k and non-M values to thousands
+    }
+    
+    const savings = convertSavings(savings_under_review_ele);
+    console.log("header savings under review : ",savings);
+    
+
+
+    const tableBodyLocator = page.locator('.optimization_summary_table_body'); // Use the appropriate selector
+    const rows = await tableBodyLocator.locator('tr'); // Select all rows within the table body
+    const rowCount = await rows.count(); // Get the number of rows
+
+    console.log(`Number of rows: ${rowCount}`);
+
+    const headerRow = await page.$('//thead[@class="optimization_summary_table_head"]');
+if (headerRow) {
+    // Get all columns (th elements) within the header row
+    const columns = await headerRow.$$('th');
+    
+    // Check if the number of columns is 8
+    if (columns.length === 9) {
+        console.log('The header has 9 columns.');
+    } else {
+        console.log(`The header has ${columns.length} columns.`);
+    }
+} else {
+    console.log('Header row not found.');
+}
+
+//Savings Under Review -calculation
+
+    const rowss = await page.$$('tbody tr');
+
+    let totalSum = 0;
+    
+    // Function to convert value to a number in thousands
+    function convertToThousands(value) {
+        // Remove the dollar sign and any commas
+        value = value.replace(/[$,]/g, '').trim();
+    
+        if (value.endsWith('k')) {
+            // Remove 'k' and convert to thousands
+            const numericValue = parseFloat(value.replace('k', ''));
+            return numericValue ? numericValue : 0; // Keep as is in thousands
+        }
+    
+        return parseFloat(value) / 1000 || 0; // Convert non-k values to thousands
+    }
+    
+    // Iterate through each row
+    for (const row of rowss) {
+        // Get the value from the specified locator
+        const value = await row.$eval('td:nth-child(3) div', div => div.innerText.trim());
+    
+        // Convert the value and add to total sum
+        const numericValue = convertToThousands(value);
+        totalSum += numericValue;
+    }
+    
+    // Convert total sum to millions if it exceeds 1,000
+    let finalSum;
+    if (totalSum >= 1000) {
+    finalSum = totalSum / 1000; // Convert to millions
+    console.log(`Total sum of Estimate savings in millions: ${finalSum}`);
+    } else {
+    finalSum = totalSum; // Keep it in thousands
+    console.log(`Total sum of Estimate savings in thousands: ${finalSum}k`);
+}
+    
+    //validation
+
+    function areEqualUpToOneDecimal(num1, num2) {
+        return num1.toFixed(1) === num2.toFixed(1);
+    }
+    
+   // expect(savings.toFixed(2)).toBe(finalSum.toFixed(2));
+    console.log(areEqualUpToOneDecimal(finalSum, savings));  
+
+    //Estimated Savings Under review Calculation
+
+    let totalSum_estimated_savings = 0;
+    
+    // Iterate through each row
+    for (const row of rowss) {
+        // Get the value from the specified locator
+        const value_estimated_savings = await row.$eval('td:nth-child(8) div', div => div.innerText.trim());
+    
+        // Convert the value and add to total sum
+        const numericValue1 = convertToThousands(value_estimated_savings);
+        totalSum_estimated_savings += numericValue1;
+    }
+    
+    // Convert total sum to millions if it exceeds 1,000
+    let finalSum_estimated_savings;
+    if (totalSum_estimated_savings >= 1000) {
+    finalSum_estimated_savings = totalSum_estimated_savings / 1000; // Convert to millions
+    console.log(`Total sum of Estimate savings in millions: ${finalSum_estimated_savings}`);
+    } else {
+    finalSum_estimated_savings = totalSum_estimated_savings; // Keep it in thousands
+    console.log(`Total sum of Estimate savings in thousands: ${finalSum_estimated_savings}k`);
+    }
+  
+    //reading header _estimated_savings
+
+    const estimated_savings_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
+    
+    const estimated_savings = parseFloat(estimated_savings_review_ele.replace(/[^\d.-]/g, ''));
+   // const savings_under_review_num = parseInt(savings_under_review, 10);
+    console.log(estimated_savings);
+
+    function areEqualUpToOneDecimal(num1, num2) {
+        return parseFloat(num1).toFixed(1) === parseFloat(num2).toFixed(1);
+    }
+    console.log(areEqualUpToOneDecimal(finalSum_estimated_savings, estimated_savings));
+
+    //function to click on i button and handle new page opening 
+
+    async function validateNewPageHeading(page, buttonSelector, expectedHeading,elementclicked) {
+    // Click the i button that opens a new page
+    const [newPage] = await Promise.all([
+        page.waitForEvent('popup'), // Wait for the new page to open
+        page.locator(buttonSelector).click() // Click the button
+    ]);
+
+    // Wait for the new page to load completely
+    await newPage.waitForLoadState('load');
+
+    // Validate the heading on the new page
+    const heading = await newPage.locator("//div[@class='container right']//h1[@class='fw-page-title']").textContent();
+    console.log(`Heading on new page: ${heading}`);
+
+    // Validate the heading
+    if (heading === expectedHeading) {
+        console.log(`After redirection from '${elementclicked}' -> to savings page!!, Heading is correct!`);
+        console.log(`Heading on new page: ${heading}`);
+    } else {
+        console.log('After redirection to savings page!!, Heading is incorrect!');
+    }
+
+    // Optionally, you can close the new page if needed
+    await newPage.close();
+}
+
+// function call
+await validateNewPageHeading(page, "(//div[@class='optimization_summary_meta_card'])[1]//div[2]//div[1]//div[1]", 'How Zluri Calculates Estimated Wastage & Savings?','Savings under review ');
+await validateNewPageHeading(page,  "(//div[@class='optimization_summary_meta_card'])[2]//div[2]//div[1]//div[1]",'How Zluri Calculates Estimated Wastage & Savings?','Estimated realized Savings');
+
+   
+//app redirection validation 
+async function validateRowLinks(page) {
+    const rows = await page.$$('tbody tr'); // Get all rows
+    let rowNumber = 1; // Initialize row number
+
+    // Check each row for the specified conditions
+    for (const row of rows) {
+        // Get the text from the specified locator
+        const valueApp = await row.$eval('td:nth-child(2) div div div', div => div.innerText.trim());
+        console.log(`Row ${rowNumber} app-name value: ${valueApp}`);
+
+        // Click on the text to open the new page by using a more specific locator within the row context
+        await page.locator('div.d-flex div.optimization_summary_app_cell div:has-text("' + valueApp + '")').click();
+
+        await page.waitForTimeout(3000);
+        // Read the text at the specified locator on the new page
+        const breadcrumbText = await page.locator("//div[@class='ins-1']//nav//ol//li[1]//div[@class='truncate_breadcrumb_item_name']").textContent();
+
+        // Validate with the previous page name
+        if (breadcrumbText.trim() === valueApp) {
+            console.log(`Validation successful for Row ${rowNumber}: '${breadcrumbText}' matches '${valueApp}'`);
+        } else {
+            console.log(`Validation failed for Row ${rowNumber}: '${breadcrumbText}' does not match '${valueApp}'`);
+        }
+        rowNumber++;
+        await page.goBack();
+        await page.waitForLoadState('load');            
+     }
+    }
+
+    // function call
+    await validateRowLinks(page);    
+
+//cross validation with optimization page cost --->>> in app optimizatio cost
+
 
 });
 
