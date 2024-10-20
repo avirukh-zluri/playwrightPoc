@@ -11,11 +11,12 @@ export class LoginPage {
     }
 
     async goToLoginPage(page){
-        await this.page.goto('https://app-release.zluri.com');
+        await this.page.goto('https://app.zluri.com');
+        //https://app-release.zluri.com
     }
     async login (page){
-       // await this.page.locator(this.enterEmail).fill('pod4_automation_prod@zluri.dev');
-        await this.page.locator(this.enterEmail).fill('stacichadwick@zluri.dev')
+        await this.page.locator(this.enterEmail).fill('pod4_automation_prod@zluri.dev');
+       // await this.page.locator(this.enterEmail).fill('stacichadwick@zluri.dev')
        // await this.page.locator(this.enterEmail).fill('zluri_prod_test3@zluri.dev');
         await this.page.locator(this.button).click();
         
@@ -23,7 +24,8 @@ export class LoginPage {
        // await this.page.locator(this.slug_submit).click();
         await this.page.waitForSelector(this.enterPassword);
         await this.page.locator(this.enterPassword).focus(); // Optional
-        await this.page.locator(this.enterPassword).fill('61rzwgSXXjVuCBTTUygarg'); 
+        await this.page.locator(this.enterPassword).fill('test@123'); 
+        //61rzwgSXXjVuCBTTUygarg
         await this.page.locator(this.continueButton).click();
         
     }
