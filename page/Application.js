@@ -153,7 +153,26 @@ export class Application {
         await this.page.locator(this.clickOnDeprovisioning).click();
         
         // Playbook Creation 
-        await this.page.locator(this.clickOnAdd).click();        
+        await this.page.locator(this.clickOnAdd).click();
+
+        // const popupPromise = this.page.waitForEvent('popup', { timeout: 10000 })
+        //     .catch(error => {
+        //         console.error('Popup did not appear:', error);
+        //         return null;
+        //     }
+        // );
+        // await this.page.locator(this.clickOnAdd).click();       
+        // const popupPage = await popupPromise;        
+        // try{
+        //     await expect(popupPage.getByText(name)).toBeVisible({ timeout: 5000 });
+        //     console.log(`Successfully found the name "${name}" in the popup`);
+        // }catch(err){
+        //     console.error(`Failed to find the name "${name}" in the popup or encountered an error:`, error);
+        // }finally{
+        //     if (!popupPage.isClosed()) {
+        //         await popupPage.close();
+        //     }
+        // }
         await setTimeout(700);
         await this.page.locator(this.clickToAddAction).click();        
         await setTimeout(700);
@@ -182,7 +201,8 @@ export class Application {
         await this.page.locator(this.clickOnAutomation).click();
         await this.page.locator(this.clickOnDeprovisioning).click();
         
-        await this.page.locator(this.clickOnEllipsisButton).nth(0).click();
+        // await this.page.locator('td:nth-child(8)').first().click();  [Alternative for next line]
+        await this.page.locator('td:nth-child(8)').filter({ hasText: /Delete Playbook/i }).first().click();
         await this.page.locator(this.clickOnDelete1).nth(0).click();
         await this.page.locator(this.clickOnDelete2).click();
     }
