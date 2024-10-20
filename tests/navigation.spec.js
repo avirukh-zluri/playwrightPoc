@@ -2,6 +2,7 @@ const {test , expect} = require('@playwright/test');
 const { setTimeout } = require("node:timers/promises");
 
 import Login, { LoginPage } from '../page2/LoginPage';
+import { OverviewPage } from '../page2/OverviewPage';
 import {ApplicationsPage} from '../page2/ApplicationsPage'
 import { DirectoryPage } from '../page2/DirectoryPage';
 import { LicensePage } from '../page2/LicensesPage';
@@ -13,7 +14,20 @@ import { ReportsPage } from '../page2/ReportsPage';
 import { SourcesPage } from '../page2/SourcesPage';
 import { WorkflowPage } from '../page2/WorkflowsPage';
 import { TaskPage } from '../page2/TasksPage';
+import { SettingsPage } from '../page2/SettingsPage';
+import { AuditLogsPage } from '../page2/AuditLogsPage';
 
+test("Overview" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+
+    //Overview
+    const overview = new OverviewPage(page);
+    await overview.goToOveriew();
+
+})
 test("Applications" , async ({page}) => {
     // Login
     const Login = new LoginPage(page);
@@ -188,4 +202,26 @@ test ("Tasks" , async({page}) =>{
     
     const tasks= new TaskPage(page);
     await tasks.goToTasks();
+});
+
+test ("Settings" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const settings= new SettingsPage(page);
+    await settings.goToSettings();
+    await settings.navigateSeetings();
+});
+
+
+test ("Audit Logs" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const audits= new AuditLogsPage(page);
+    await audits.goToAuditLog();
 });
