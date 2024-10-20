@@ -13,16 +13,22 @@ export class LoginPage {
     async goToLoginPage(page){
         await this.page.goto('https://app.zluri.dev');
     }
-    async login (page){
-        await this.page.locator(this.enterEmail).fill('zluri_newdev_user4@zluri.dev');
+    async login (loginData){
+        const {
+            userName,
+            password,
+            slug
+        } = loginData;
+        await this.page.locator(this.enterEmail).fill(userName);
         await this.page.locator(this.button).click();
         
-        await this.page.locator(this.enter_slug).fill('testtemplate-6');
-        await this.page.locator(this.slug_submit).click();
-
+        if(slug){
+            await this.page.locator(this.enter_slug).fill(slug);
+            await this.page.locator(this.slug_submit).click();
+        }
         await this.page.waitForSelector(this.enterPassword);
         await this.page.locator(this.enterPassword).focus(); 
-        await this.page.locator(this.enterPassword).fill('test@123'); 
+        await this.page.locator(this.enterPassword).fill(password); 
         await this.page.locator(this.continueButton).click();
         
     }
