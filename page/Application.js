@@ -206,4 +206,4 @@ export class Application {
         await this.page.locator(this.clickOnDelete1).nth(0).click();
         await this.page.locator(this.clickOnDelete2).click();
     }
-}
+}   
