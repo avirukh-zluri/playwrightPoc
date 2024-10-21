@@ -1,5 +1,7 @@
 const {test , expect} = require('@playwright/test');
 const { setTimeout } = require("node:timers/promises");
+import path from 'path';
+import fs from 'fs';
 
 import Login, { LoginPage } from '../page2/LoginPage';
 import { OverviewPage } from '../page2/OverviewPage';
@@ -23,6 +25,13 @@ import { AuditLogsPage } from '../page2/AuditLogsPage';
 
 
 
+const APIListener = require('../utils/APIListener.js');
+let globalApiListener;
+
+test.beforeAll(async () => {
+    globalApiListener = new APIListener();
+});
+
 test.beforeEach(async ({ page }) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
@@ -31,9 +40,25 @@ test.beforeEach(async ({ page }) => {
         password:"test@123",
         slug:"testtemplate-6"
     });
+    await globalApiListener.startListening(page);
+    page.apiListener = globalApiListener;
+});
+test.afterEach(async ({}, testInfo) => {
+    const outputFolder = path.join(__dirname, 'data');  
+    if (!fs.existsSync(outputFolder)) {
+        fs.mkdirSync(outputFolder, { recursive: true });
+    }
+    const fileName = `${testInfo.title.replace(/\s+/g, '_')}_curls.txt`;
+    
+    const filePath = path.join(outputFolder, fileName);
+    //fs.writeFileSync(filePath, `Test case "${testInfo.title}" has been completed with curls!`);
+  
+    console.log(`File ${fileName} created for test case: ${testInfo.title}`);
+    await globalApiListener.saveAsCurls(filePath);
+    await globalApiListener.saveAsPostmanCollection(path.join(outputFolder, 'collection.json'));
   });
 
-  test("Overview" , async({page}) =>{
+test("Overview" , async({page}) =>{
     //Overview
     const overview = new OverviewPage(page);
     await overview.goToOveriew();
@@ -42,7 +67,7 @@ test.beforeEach(async ({ page }) => {
    // await overview.navigateOverview();
 
 })
-test("Applications" , async ({page}) => {
+test('Applications' , async ({page}) => {
     //Application
     const apps = new ApplicationsPage(page);
     await apps.gotoApplications();
