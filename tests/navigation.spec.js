@@ -53,7 +53,7 @@ test.afterEach(async ({}, testInfo) => {
     const filePath = path.join(outputFolder, fileName);
     fs.writeFileSync(filePath, `Test case "${testInfo.title}" has been completed with curls!`);
   
-    console.log(`File ${fileName} created for test case: ${testInfo.title}`);
+    //console.log(`File ${fileName} created for test case: ${testInfo.title}`);
     await globalApiListener.saveAsCurls(filePath);
     await globalApiListener.saveAsPostmanCollection(path.join(outputFolder, 'collection.json'));
   });
