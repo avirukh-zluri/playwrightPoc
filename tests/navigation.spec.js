@@ -13,13 +13,22 @@ import { ReportsPage } from '../page2/ReportsPage';
 import { SourcesPage } from '../page2/SourcesPage';
 import { WorkflowPage } from '../page2/WorkflowsPage';
 import { TaskPage } from '../page2/TasksPage';
+import { EV_Application } from '../page2/EV_ApplicationPage';
+import { EV_AccessReview } from '../page2/EV_AccessReviewPage';
+import { EV_AccessRequest } from '../page2/EV_AccessRequest';
+import { EV_Task } from '../page2/EV_Task';
 
-test("Applications" , async ({page}) => {
-    // Login
+test.beforeEach(async ({ page }) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
-    await Login.login();
+    await Login.login({
+        userName:"zluri_newdev_user4@zluri.dev",
+        password:"test@123",
+        slug:"testtemplate-6"
+    });
+  });
 
+test("Applications" , async ({page}) => {
     //Application
     const apps = new ApplicationsPage(page);
     await apps.gotoApplications();
@@ -33,12 +42,6 @@ test("Applications" , async ({page}) => {
 
 
 test("Directory" , async ({page}) => {
-    
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Directory
     const pageDirectory = new DirectoryPage(page);
     await pageDirectory.goToDirectory();
@@ -54,11 +57,6 @@ test("Directory" , async ({page}) => {
 });
 
 test ("Licenses" , async({page}) =>{
-     // Login
-     const Login = new LoginPage(page);
-     await Login.goToLoginPage();
-     await Login.login();
-
      //Licenses
      const Licensess = new LicensePage(page);
      await Licensess.goToLicenses();
@@ -77,11 +75,6 @@ test ("Licenses" , async({page}) =>{
 
 
 test ("Optimizations" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Optimizations
     const optmzn = new OptimizationPage(page);
     await optmzn.goToOptimization();
@@ -91,11 +84,6 @@ test ("Optimizations" , async({page}) =>{
 
 
 test ("Spends" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Spends
     const spends = new Spends(page);
     await spends.goToSpends();
@@ -109,11 +97,6 @@ test ("Spends" , async({page}) =>{
 
 
 test ("Security" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //spends
     const secure = new SecurityPage(page);
     await secure.goToSecurity();
@@ -122,11 +105,6 @@ test ("Security" , async({page}) =>{
 
 
 test ("Access Reviews" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //access Reviews
     const accessReview = new AccessReviewsPage(page);
     await accessReview.goToAccessReviews();
@@ -134,11 +112,6 @@ test ("Access Reviews" , async({page}) =>{
 });
 
 test ("Reports" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //reports
     const report = new ReportsPage(page);
     await report.goToReports();
@@ -149,11 +122,6 @@ test ("Reports" , async({page}) =>{
 });
 
 test ("Sources" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Integrations
     const source = new SourcesPage(page);
     await source.goToSources();
@@ -165,11 +133,6 @@ test ("Sources" , async({page}) =>{
 });
 
 test ("Workflows" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Workflows
     const integration = new WorkflowPage(page);
     await integration.goToWorkflows();
@@ -181,11 +144,51 @@ test ("Workflows" , async({page}) =>{
 });
 
 test ("Tasks" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-    
     const tasks= new TaskPage(page);
     await tasks.goToTasks();
+});
+
+// Employee View 
+
+test ("EV_OverView" , async({page}) =>{
+    await page.locator("//nav[@class='Nav ml-auto navbar navbar-expand navbar-light bg-white']//div//span[@class='navbar-brand']").click();
+    await page.locator("//button[normalize-space()='Switch to Employee View']").click();
+
+});
+
+test ("EV Application" , async({page}) =>{
+    await page.locator("//nav[@class='Nav ml-auto navbar navbar-expand navbar-light bg-white']//div//span[@class='navbar-brand']").click();
+    await page.locator("//button[normalize-space()='Switch to Employee View']").click();
+    
+    const pageApplication = new EV_Application(page);
+    await pageApplication.goToEVApplication();
+    await pageApplication.navigateEVApplication();
+
+});
+
+test ("EV Access Review" , async({page}) =>{
+    await page.locator("//nav[@class='Nav ml-auto navbar navbar-expand navbar-light bg-white']//div//span[@class='navbar-brand']").click();
+    await page.locator("//button[normalize-space()='Switch to Employee View']").click();
+    
+    const pageAccessReview = new EV_AccessReview(page);
+    await pageAccessReview.goToEVAccessReview();
+    await pageAccessReview.navigateEVAccessReview();
+});
+
+test ("EV Access Request" , async({page}) =>{
+    await page.locator("//nav[@class='Nav ml-auto navbar navbar-expand navbar-light bg-white']//div//span[@class='navbar-brand']").click();
+    await page.locator("//button[normalize-space()='Switch to Employee View']").click();
+    
+    const pageAccessRequest = new EV_AccessRequest(page);
+    await pageAccessRequest.goToEVAccessRequest();
+    await pageAccessRequest.navigateEVAccessRequest();
+});
+
+test ("EV Task" , async({page}) =>{
+    await page.locator("//nav[@class='Nav ml-auto navbar navbar-expand navbar-light bg-white']//div//span[@class='navbar-brand']").click();
+    await page.locator("//button[normalize-space()='Switch to Employee View']").click();
+    
+    const pageTask = new EV_Task(page);
+    await pageTask.goToEVTask();
+    
 });
