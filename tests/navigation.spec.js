@@ -38,6 +38,9 @@ test.beforeEach(async ({ page }) => {
     const overview = new OverviewPage(page);
     await overview.goToOveriew();
 
+    //to be verified
+   // await overview.navigateOverview();
+
 })
 test("Applications" , async ({page}) => {
     //Application
