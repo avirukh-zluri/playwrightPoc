@@ -42,17 +42,7 @@ test.beforeEach(async ({ page }) => {
     });
     await globalApiListener.startListening(page);
     page.apiListener = globalApiListener;
-  });
-
-    test("Overview" , async({page}) =>{
-    //Overview
-    const overview = new OverviewPage(page);
-    await overview.goToOveriew();
-
-    //to be verified
-   // await overview.navigateOverview();
-
-})
+});
 test.afterEach(async ({}, testInfo) => {
     const outputFolder = path.join(__dirname, 'data');  
     if (!fs.existsSync(outputFolder)) {
@@ -68,6 +58,15 @@ test.afterEach(async ({}, testInfo) => {
     await globalApiListener.saveAsPostmanCollection(path.join(outputFolder, 'collection.json'));
   });
 
+test("Overview" , async({page}) =>{
+    //Overview
+    const overview = new OverviewPage(page);
+    await overview.goToOveriew();
+
+    //to be verified
+   // await overview.navigateOverview();
+
+})
 test('Applications' , async ({page}) => {
     //Application
     const apps = new ApplicationsPage(page);
