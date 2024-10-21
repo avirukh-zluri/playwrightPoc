@@ -2,6 +2,7 @@ const {test , expect} = require('@playwright/test');
 const { setTimeout } = require("node:timers/promises");
 
 import Login, { LoginPage } from '../page2/LoginPage';
+import { OverviewPage } from '../page2/OverviewPage';
 import {ApplicationsPage} from '../page2/ApplicationsPage'
 import { DirectoryPage } from '../page2/DirectoryPage';
 import { LicensePage } from '../page2/LicensesPage';
@@ -17,6 +18,10 @@ import { EV_Application } from '../page2/EV_ApplicationPage';
 import { EV_AccessReview } from '../page2/EV_AccessReviewPage';
 import { EV_AccessRequest } from '../page2/EV_AccessRequest';
 import { EV_Task } from '../page2/EV_Task';
+import { SettingsPage } from '../page2/SettingsPage';
+import { AuditLogsPage } from '../page2/AuditLogsPage';
+
+
 
 test.beforeEach(async ({ page }) => {
     const Login = new LoginPage(page);
@@ -28,6 +33,17 @@ test.beforeEach(async ({ page }) => {
     });
   });
 
+  test("Overview" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+
+    //Overview
+    const overview = new OverviewPage(page);
+    await overview.goToOveriew();
+
+})
 test("Applications" , async ({page}) => {
     //Application
     const apps = new ApplicationsPage(page);
@@ -146,6 +162,28 @@ test ("Workflows" , async({page}) =>{
 test ("Tasks" , async({page}) =>{
     const tasks= new TaskPage(page);
     await tasks.goToTasks();
+});
+
+test ("Settings" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const settings= new SettingsPage(page);
+    await settings.goToSettings();
+    await settings.navigateSeetings();
+});
+
+
+test ("Audit Logs" , async({page}) =>{
+    // Login
+    const Login = new LoginPage(page);
+    await Login.goToLoginPage();
+    await Login.login();
+    
+    const audits= new AuditLogsPage(page);
+    await audits.goToAuditLog();
 });
 
 // Employee View 
