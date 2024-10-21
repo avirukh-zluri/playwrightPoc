@@ -49,6 +49,7 @@ test("Applications" , async ({page}) => {
     const apps = new ApplicationsPage(page);
     await apps.gotoApplications();
     await apps.navigateApplications();
+    await apps.navigateApplications();
 
     //Automation
    await apps.goToAutomations();
