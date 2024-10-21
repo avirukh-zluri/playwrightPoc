@@ -8,7 +8,7 @@ export class ApplicationsPage {
         // Locators
         this.managedApplicationCount = "//div[contains(text(),'Managed Applications')]//..//..//span/..";
         this.ApplicationsButton = "//span[contains(text(),'Applications')]";
-        this.clickonManagedapps = "//ul[@class='nav nav-tabs']//div[1]//a//div";
+        this.clickonManagedapps = "//div[normalize-space()='Managed']";
         this.clickOnUnmanaged = "//div[contains(text(),'Unmaaanaged')]| //div[normalize-space()='Unmanaged']";
         this.clickOnRestricted = "//div[contains(text(),'Restricted')]";
         this.clickOnNeedReviews = "//div[contains(text(),'Needs Review')]";
@@ -27,9 +27,9 @@ export class ApplicationsPage {
    };
 
    async navigateApplications(){
-    await this.page.locator(this.clickonManagedapps).click();
+    await this.page.locator(this.clickonManagedapps).first().click();
     await this.page.waitForTimeout(3000);
-    await this.page.locator(this.clickOnUnmanaged).click();
+    await this.page.locator(this.clickOnUnmanaged).first().click();
     await this.page.waitForTimeout(3000);
     await this.page.locator(this.clickOnRestricted).click();
     await this.page.waitForTimeout(3000);
