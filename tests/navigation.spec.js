@@ -34,11 +34,6 @@ test.beforeEach(async ({ page }) => {
   });
 
   test("Overview" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-
     //Overview
     const overview = new OverviewPage(page);
     await overview.goToOveriew();
@@ -166,11 +161,7 @@ test ("Tasks" , async({page}) =>{
 });
 
 test ("Settings" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
-    
+   
     const settings= new SettingsPage(page);
     await settings.goToSettings();
     await settings.navigateSeetings();
@@ -178,10 +169,6 @@ test ("Settings" , async({page}) =>{
 
 
 test ("Audit Logs" , async({page}) =>{
-    // Login
-    const Login = new LoginPage(page);
-    await Login.goToLoginPage();
-    await Login.login();
     
     const audits= new AuditLogsPage(page);
     await audits.goToAuditLog();
