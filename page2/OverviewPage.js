@@ -16,18 +16,18 @@ export class OverviewPage {
         this.ClickonOverviewTotalActiveUser = "//div[normalize-space()='Total Active Users']";
 
         //Average usage 
-        this.clickOnaverage_usage_ele1 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[3]/div[3]/div[1]";
-        this.clickOnaverage_usage_ele2 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[3]/div[3]/div[2]";
-        this.clickOnaverage_usage_ele3 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[3]/div[3]/div[3]";
-        this.clickOnaverage_usage_ele4 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[3]/div[3]/div[4]";
+        this.clickOnaverage_usage_ele1 = "//div[@class='apex-card-container rounded'][3]/div[3]/div[1]";
+        this.clickOnaverage_usage_ele2 = "//div[@class='apex-card-container rounded'][3]/div[3]/div[2]";
+        this.clickOnaverage_usage_ele3 = "//div[@class='apex-card-container rounded'][3]/div[3]/div[3]";
+        this.clickOnaverage_usage_ele4 = "//div[@class='apex-card-container rounded'][3]/div[3]/div[4]";
 
 
         //total spends
 
-        this.clickOntotal_spends_ele1 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[4]/div[3]/div[1]";
-        this.clickOntotal_spends_ele2 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[4]/div[3]/div[2]";
-        this.clickOntotal_spends_ele3 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[4]/div[3]/div[3]";
-        this.clickOntotal_spends_ele4 = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div[4]/div[3]/div[4]";
+        this.clickOntotal_spends_ele1 = "//div[@class='apex-card-container rounded'][4]/div[3]/div[1]";
+        this.clickOntotal_spends_ele2 = "//div[@class='apex-card-container rounded'][4]/div[3]/div[2]";
+        this.clickOntotal_spends_ele3 = "//div[@class='apex-card-container rounded'][4]/div[3]/div[3]";
+        this.clickOntotal_spends_ele4 = "//div[@class='apex-card-container rounded'][4]/div[3]/div[4]";
 
         //bottom elements
         this.clickonViewDepartment = "//span[normalize-space()='View Departments']";
@@ -127,24 +127,12 @@ export class OverviewPage {
     await this.page.locator(this.clickonViewDepartment).click();
 
         //budget per department
-        let isVisible = true;
-
-    while (isVisible) {
-        try {
-        // Check if the locator is visible
-        isVisible = await this.page.locator(this.clickonNextarrow).isVisible();
-        
-        if (isVisible) {
-            // Click on the locator if it is visible
+        let i;
+        for(i=0;i<4;i++){
             await this.page.locator(this.clickonNextarrow).click();
             await this.page.waitForTimeout(1000); // Wait after clicking
+            i++;
         }
-        } catch (error) {
-        // If the locator is not found or any error occurs, break the loop
-        console.error('Locator not found or error occurred:', error);
-        break;
-        }
-    }
 
     }
 }
