@@ -569,7 +569,7 @@ export class LicensePage{
         await this.page.locator(this.clickOnStartDate).click();
         await this.page.locator(this.startDate).click();
         // Payment Date
-        await this.page.locator(this.paymentDate).click();
+        await this.page.locator(this.paymentDate).first().click();
 
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();

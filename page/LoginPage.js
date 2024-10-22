@@ -19,18 +19,18 @@ export class LoginPage {
         //https://app-release.zluri.com
     }
     async login (slugData){
-        // const {
-        //     slug
-        // } = slugData;
-        await this.page.locator(this.enterEmail).fill('pod4_automation_prod@zluri.dev');
-       // await this.page.locator(this.enterEmail).fill('stacichadwick@zluri.dev')
-       // await this.page.locator(this.enterEmail).fill('zluri_prod_test3@zluri.dev');
+        const {
+            userName,
+            password,
+            slug
+        } = slugData;
+        await this.page.locator(this.enterEmail).fill(userName);
         await this.page.locator(this.button).click();
-        // if(slug){
-        //     await this.page.locator(this.enterSlug).fill(slug)
-        //     await this.page.locator(this.clickOnSubmit).click();
-        // }
-        await this.page.locator(this.enterPassword).fill('test@123');
+        if(slug){
+            await this.page.locator(this.enterSlug).fill(slug)
+            await this.page.locator(this.clickOnSubmit).click();
+        }
+        await this.page.locator(this.enterPassword).fill(password);
         await this.page.locator(this.continueButton).click();
         
     }
