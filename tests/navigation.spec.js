@@ -64,14 +64,13 @@ test("Overview" , async({page}) =>{
     await overview.goToOveriew();
 
     //to be verified
-   // await overview.navigateOverview();
+   await overview.navigateOverview();
 
 })
 test('Applications' , async ({page}) => {
     //Application
     const apps = new ApplicationsPage(page);
     await apps.gotoApplications();
-    await apps.navigateApplications();
     await apps.navigateApplications();
 
     //Automation

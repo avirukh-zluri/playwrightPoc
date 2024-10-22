@@ -8,8 +8,8 @@ export class ApplicationsPage {
         // Locators
         this.managedApplicationCount = "//div[contains(text(),'Managed Applications')]//..//..//span/..";
         this.ApplicationsButton = "//span[contains(text(),'Applications')]";
-        this.clickonManagedapps = "//div[normalize-space()='Managed']";
-        this.clickOnUnmanaged = "//div[contains(text(),'Unmaaanaged')]| //div[normalize-space()='Unmanaged']";
+        this.clickonManagedapps = "//div[contains(text(),'Managed')]";
+        this.clickOnUnmanaged = "//div[contains(text(),'Unmanaged')]| //div[normalize-space()='Unmanaged']";
         this.clickOnRestricted = "//div[contains(text(),'Restricted')]";
         this.clickOnNeedReviews = "//div[contains(text(),'Needs Review')]";
         this.clickOnAllApp = "//div[contains(text(),'All Apps')]";
