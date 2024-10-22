@@ -54,6 +54,7 @@ test('Contract with License', async ( {page} ) => {
     });
 });
 
+
 test('Contract without License', async ( {page} ) => { 
     const license = new LicensePage(page);
     await license.goToLicenses();
@@ -418,7 +419,7 @@ test("Vendors", async ({page}) => {
 
         const intermediade_match = intermediade_vendor_count_text.match(/(\d+)/); // This will match the first sequence of digits
         const intermediade_numberOfVendors = intermediade_match[0]; // Extract the matched number
-        console.log(`The intermediade Vendor count is ${intermediade_numberOfVendors}`); 
+        console.log(`The intermediate Vendor count is ${intermediade_numberOfVendors}`); 
         
         //verify the existance of the added vendor
         await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill(vendor_name);
@@ -454,17 +455,161 @@ test("Vendors", async ({page}) => {
         await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
         await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
 
-        const vendor_spend_element = await page.locator("//div[@role='navigation']//div//div[3]//div[1]//div[2]");
+        
 
-    
-    const divs = await vendor_spend_element.locator('div'); // Get child divs
+        const vendorSpendElement = await page.locator("//div[@class='z_summary_container']/div/div[3]/div/div[2]").textContent();
+        console.log('Vendor spend:', vendorSpendElement);
 
-    // Get the text content of the second child div
-    const secondDivTextContent = await divs.nth(1).textContent(); // nth(1) targets the second div (0-based index)
+    // Extract the dollar sign and amount
+    const vendor_spend_amountMatch = vendorSpendElement.match(/(\$)(\d+)/);
 
-        console.log(secondDivTextContent);
-        const vendor_spend_text = await vendor_spend_element.textContent(); 
-        console.log(vendor_spend_text);
+    if (vendor_spend_amountMatch) {
+    var spend_amount_Sign = vendor_spend_amountMatch[1]; // This will be '$'
+    var spend_amount = parseFloat(vendor_spend_amountMatch[2]); // This will be '0'
+   
+    console.log('Spend Sign:', spend_amount_Sign);
+    console.log('Spend Amount:', spend_amount);
+    } else {
+    console.log('Could not extract amount and dollar sign.');
+    }
+
+
+    const rows_vendor = await page.$$('tbody tr');
+
+    let total_vendor_spend = 0;
+
+    for (let i = 0; i < rows_vendor.length; i++) {
+        // Use the row index to create a locator for the current row
+        const vendorSpendElement = await page.locator(`tbody tr:nth-child(${i + 1}) td:nth-child(7) div div.cursor-default.d-flex.justify-content-center`).textContent();
+
+        // Extract the numerical value
+        const amountMatch = vendorSpendElement.match(/(\$)(\d+)/);
+
+        if (amountMatch) {
+            const amount = parseFloat(amountMatch[2]); // Convert string to number
+            total_vendor_spend += amount; // Add to the total
+        }
+    }
+
+    console.log('Total Amount:', total_vendor_spend);
+    //vendors table-spend validation 
+
+    if(total_vendor_spend == spend_amount){
+        expect(total_vendor_spend).toBe(spend_amount);
+        console.log(`The spend amount from header is ${spend_amount},which is same as sum of spend in table ${total_vendor_spend}`);
+    }
+
+
+
+    //pick dollar currency -header 
+    const vendor_spend_currency = await page.locator("//div[@class='z_summary_container']/div/div[3]/div/div[2]/span[2]");
+
+
+    // Get all header elements
+    const headers_before = await page.locator("//div[@class='table-header-text']").allTextContents();
+
+    // Get column count
+    const columnCount_before = headers_before.length;
+
+    // Log the column count
+    console.log(`Column Count: ${columnCount_before}`);
+
+    // Log each column name
+    headers_before.forEach((header_before, index) => {
+        console.log(`Column ${index + 1}: ${header_before}`);
+    });
+
+    //select colums validation
+    await page.locator("//div[@class='top__Uploads']//div[1]/div[3]//img").click();
+    //UnmappedSpends ->uncheck
+    await page.locator("//div[@class='addContractModal__TOP h-100']//div//ul//div[@class='flex'][5]//div[2]").click();
+    //cost ->=>uncheck
+    await page.locator("//div[@class='addContractModal__TOP h-100']//div//ul//div[@class='flex'][7]//div[2]").click();
+    //submit
+    await page.locator("//button[normalize-space()='Apply']").click();
+
+    await page.waitForTimeout(3000);
+
+    // Get all header elements
+    const headers = await page.locator("//div[@class='table-header-text']").allTextContents();
+    // Get column count
+    const columnCount = headers.length;
+    // Log the column count
+    console.log(`Column Count after operation: ${columnCount}`);
+    // Log each column name
+    headers.forEach((header, index) => {
+        console.log(`Column ${index + 1}: ${header}`);
+    });
+
+    //undo task 
+    //select colums validation
+    await page.locator("//div[@class='top__Uploads']//div[1]/div[3]//img").click();
+    //UnmappedSpends ->check
+    await page.locator("//div[@class='addContractModal__TOP h-100']//div//ul//div[@class='flex'][5]//div[2]").click();
+    //cost ->=>check
+    await page.locator("//div[@class='addContractModal__TOP h-100']//div//ul//div[@class='flex'][7]//div[2]").click();
+    //submit
+    await page.locator("//button[normalize-space()='Apply']").click();
+
+    await page.waitForTimeout(3000);
+
+    // Get all header elements
+    const headers_after = await page.locator("//div[@class='table-header-text']").allTextContents();
+    // Get column count
+    const columnCount_after = headers_after.length;
+    // Log the column count
+    console.log(`Column Count after operation: ${columnCount_after}`);
+    // Log each column name
+    headers_after.forEach((headers_after, index) => {
+        console.log(`Column ${index + 1}: ${headers_after}`);
+    });
+
+    if(columnCount_before == (columnCount+2)){
+        console.log("select column worked correctly for removing columns");
+    }
+    else{
+        console.log("select column didn't worked correctly for removing columns");
+    }
+
+    if(columnCount_after == (columnCount+2)){
+        console.log("select column worked correctly for adding columns");
+    }
+    else{
+        console.log("select column didn't worked correctly for removing columns");
+    }
+
+    //FILTER Operation
+
+    await page.locator("//div[@class='top__Uploads']//div[1]//div[2]//span[@class='grey font-13 mr-2']").click();
+    await page.locator("//div[@class='applied_filters_modal_button w-100 d-flex align-items-center primary-color font-12 justify-content-center cursor-pointer']").click();
+    await page.locator("//img[@id='vendor_name']").click();
+    await page.locator("(//input[@id='formBasicCheckbox'])[4]").fill("TestVendor");
+    await page.locator("//button[normalize-space()='Apply']").click();
+    await page.waitForTimeout(5000);
+    console.log("set Filter Operation worked correctly");
+
+    //page reload
+    await page.locator("//img[@class='w-100 h-100 m-auto']").click();
+    console.log("Reload triggered");
+    await page.waitForTimeout(2000);
+    //Remove Filter
+    await page.locator("//div[@class='top__Uploads']//div[1]//div[2]//span[@class='grey font-13 mr-2']").click();
+    await page.waitForTimeout(1000);
+    await page.locator("//img[@class='ml-auto cursor-pointer']").click();
+    await page.waitForTimeout(3000);
+    console.log("Remove-Filter Operation worked correctly,this also indicates that filter wass maintained after reload");
+
+    await page.reload();
+    await page.waitForTimeout(3000);
+
+    //Export
+    await page.locator("//button[@class='export mt-auto mb-auto mr-3']").click();
+    await page.locator("//div[@class='pt-1 form-check']//input[@type='checkbox']").click();
+    await page.locator("//button[normalize-space()='Start Export']").click();
+    await page.locator("//button[normalize-space()='Close']").click();
+    console.log("Export is triggered successfully");
+
+    //Reload
 
     });
 
