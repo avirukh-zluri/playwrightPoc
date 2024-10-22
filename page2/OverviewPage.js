@@ -35,9 +35,11 @@ export class OverviewPage {
         //budget per department
         this.clickonNextarrow = "//div[@class='w-full px-3']//div[contains(@class,'d-flex dtable_nav')]//div[@class='d-flex']//div//i[@class='ov_arrow ov_right']";
     
+        //top apps
+        this.clickOnNextarrow2 = "//div[@class='px-3']//div[contains(@class,'d-flex dtable_nav')]//div[@class='d-flex']//div//i[@class='ov_arrow ov_right']";
     }
 
-    async waitForSomeTime(timeout = 2000) {
+    async waitForSomeTime(timeout = 3000) {
         await this.page.waitForTimeout(timeout);
     }
 
@@ -50,89 +52,97 @@ export class OverviewPage {
 
         //manages apps
         await this.page.locator(this.clickOnOverviewUnmanaged).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.clickOnOverviewRestricted).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.clickOnOverviewNeedsReviews).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.ClickOnOverviewTotalApplications).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
+        await this.page.goBack();
 
         //..active employees
         await this.page.locator(this.clickonOverviewGroup).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.ClickonOverviewServices).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.ClickonOverviewExternal).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.ClickonOverviewTotalActiveUser).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
 
     //average usage
     await this.page.locator(this.clickOnaverage_usage_ele1).click();
-    await this.page.waitForTimeout(timeout);
-    await page.goBack();
+    await this.waitForSomeTime();
+    await this.page.goBack();
 
     await this.page.locator(this.clickOnaverage_usage_ele2).click();
-    await this.page.waitForTimeout(timeout);
-    await page.goBack();
+    await this.waitForSomeTime();
+    await this.page.goBack();
 
     await this.page.locator(this.clickOnaverage_usage_ele3).click();
-    await this.page.waitForTimeout(timeout);
-    await page.goBack();
+    await this.waitForSomeTime();
+    await this.page.goBack();
 
     await this.page.locator(this.clickOnaverage_usage_ele4).click();
-    await this.page.waitForTimeout(timeout);
-    await page.goBack();
+    await this.waitForSomeTime();
+    await this.page.goBack();
 
 
         //total spends
         await this.page.locator(this.clickOntotal_spends_ele1).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.clickOntotal_spends_ele2).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.clickOntotal_spends_ele3).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         await this.page.locator(this.clickOntotal_spends_ele4).click();
-        await this.page.waitForTimeout(timeout);
-        await page.goBack();
+        await this.waitForSomeTime();
+        await this.page.goBack();
 
         //contract renewals
 
 
     //View Departmets
     await this.page.locator(this.clickonViewDepartment).scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(timeout);
+    await this.waitForSomeTime(); 
     await this.page.locator(this.clickonViewDepartment).click();
 
         //budget per department
         let i;
-        for(i=0;i<4;i++){
+        for(i=0;i<5;i++){
             await this.page.locator(this.clickonNextarrow).click();
             await this.page.waitForTimeout(1000); // Wait after clicking
             i++;
         }
 
+        //top app
+        let j;
+        for(j=0;j<2;j++){
+            await this.page.locator(this.clickOnNextarrow2).click();
+            await this.page.waitForTimeout(1000); // Wait after clicking
+            j++;
+        }
     }
 }

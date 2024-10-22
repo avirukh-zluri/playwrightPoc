@@ -2,7 +2,7 @@ const {test , expect} = require('@playwright/test');
 const { setTimeout } = require("node:timers/promises");
 const { SignUpPage } = require('../page/SignUpPage');
 const fs = require('fs');
-const csv = require('csv-parse/sync');
+//const csv = require('csv-parse/sync');
 const path = require('path');
 
 const CSV_FILE_PATH = path.join('/Users/rajaverma/Documents', 'data.csv');
