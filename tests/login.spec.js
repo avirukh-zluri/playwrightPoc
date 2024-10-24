@@ -21,10 +21,10 @@ test.beforeEach(async ({ page }) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login({
-        userName:"stacichadwick@zluri.dev",
-        //pod4_automation_prod@zluri.dev
-        password:"61rzwgSXXjVuCBTTUygarg",
-        //test@123
+        userName:"pod4_automation_prod@zluri.dev",
+        //stacichadwick@zluri.dev
+        password:"test@123",
+        //61rzwgSXXjVuCBTTUygarg
     });
     // await globalApiListener.startListening(page);
     // page.apiListener = globalApiListener;
