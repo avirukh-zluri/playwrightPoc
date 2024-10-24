@@ -21,8 +21,10 @@ test.beforeEach(async ({ page }) => {
     const Login = new LoginPage(page);
     await Login.goToLoginPage();
     await Login.login({
-        userName:"pod4_automation_prod@zluri.dev",
-        password:"test@123",
+        userName:"stacichadwick@zluri.dev",
+        //pod4_automation_prod@zluri.dev
+        password:"61rzwgSXXjVuCBTTUygarg",
+        //test@123
     });
     // await globalApiListener.startListening(page);
     // page.apiListener = globalApiListener;
@@ -496,7 +498,7 @@ test("Renewals", async ({page}) => {
 
         
         //month card
-        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[1]").click()
+        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click()
         await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
         await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
 
@@ -724,22 +726,22 @@ test("Vendors", async ({page}) => {
     await page.locator("//img[@id='vendor_name']").click();
     await page.locator("(//input[@id='formBasicCheckbox'])[4]").fill("TestVendor");
     await page.locator("//button[normalize-space()='Apply']").click();
-    await page.waitForTimeout(5000);
+    //await page.waitForTimeout(3000);
     console.log("set Filter Operation worked correctly");
 
     //page reload
     await page.locator("//img[@class='w-100 h-100 m-auto']").click();
     console.log("Reload triggered");
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     //Remove Filter
     await page.locator("//div[@class='top__Uploads']//div[1]//div[2]//span[@class='grey font-13 mr-2']").click();
-    await page.waitForTimeout(1000);
+   // await page.waitForTimeout(1000);
     await page.locator("//img[@class='ml-auto cursor-pointer']").click();
-    await page.waitForTimeout(3000);
+    //await page.waitForTimeout(2000);
     console.log("Remove-Filter Operation worked correctly,this also indicates that filter wass maintained after reload");
-
+    //await page.waitForTimeout(1000);
     await page.reload();
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
 
     //Export
     await page.locator("//button[@class='export mt-auto mb-auto mr-3']").click();
@@ -1099,13 +1101,13 @@ async function validateRowLinks(page) {
     // Check each row for the specified conditions
     for (const row of rows) {
         // Get the text from the specified locator
-        const valueApp = await row.$eval('td:nth-child(2) div div div', div => div.innerText.trim());
+        const valueApp = await row.$eval('td:nth-child(2) div div div[style*="cursor: pointer"]', div => div.innerText.trim());
         console.log(`Row ${rowNumber} app-name value: ${valueApp}`);
 
         // Click on the text to open the new page by using a more specific locator within the row context
         await page.locator('div.d-flex div.optimization_summary_app_cell div:has-text("' + valueApp + '")').click();
 
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(1000);
         // Read the text at the specified locator on the new page
         const breadcrumbText = await page.locator("//div[@class='ins-1']//nav//ol//li[1]//div[@class='truncate_breadcrumb_item_name']").textContent();
 
