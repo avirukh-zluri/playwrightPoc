@@ -28,17 +28,14 @@ test.beforeEach(async ({ page }) => {
     // page.apiListener = globalApiListener;
 });
 
-test('Contract with License', async ( {page} ) => { 
+test('Contract with License without custom fields', async ( {page} ) => { 
     const license = new LicensePage(page);
-    
-
-
     await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     await license.createContract({
-        newName:"Test",
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
-        // vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
@@ -54,11 +51,39 @@ test('Contract with License', async ( {page} ) => {
     });
 });
 
-test('Contract without License', async ( {page} ) => { 
+test('Contract with License with custom fields', async ( {page} ) => { 
     const license = new LicensePage(page);
     await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     await license.createContract({
-        newName:"Test",
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        // vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        basePrice:"0",
+        oneTimeFee:"0",
+        licenseName:"Pro",
+        cost:"1000",
+        tenure:"months",
+        discount:"0",
+        descriptionLicense:"Demo",
+        quantity:"1000",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test('Contract without License without custom fields', async ( {page} ) => { 
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.createContract({
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
         primaryOwner:"Jocker",
@@ -67,12 +92,30 @@ test('Contract without License', async ( {page} ) => {
         negotiationOwner:"Jocker",
     });
 });
-
-test('Contract with Vendor Validation and without License' , async ({page}) => {
+test('Contract without License with Custom field', async ( {page} ) => { 
     const license = new LicensePage(page);
     await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     await license.createContract({
-        newName:"Test",
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test('Contract without License without custom fields but with Vendor Validation' , async ({page}) => {
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.goToLicenses();
+    await license.createContract({
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -265,17 +308,48 @@ async function scrollThroughDynamicElements(page, selector, maxScrolls = 10) {
     await pageDirectory.navigateUsers();
 });
 
-test("Subscription with License" , async ({page}) => {
+test("Subscription with License with Custom Fields" , async ({page}) => {
     const pageLicenses = new LicensePage(page);
     
     // Go to Licenses
     await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     // Create Subscription
     await pageLicenses.createSubscription({
-        newName:"Test",
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years",
+        basePrice:"0",
+        oneTimeFee:"0",
+        licenseName:"Pro",
+        cost:"1000",
+        tenure:"months",
+        discount:"0",
+        descriptionLicense:"Demo",
+        quantity:"1000",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test("Subscription with License without Custom Fields" , async ({page}) => {
+    const pageLicenses = new LicensePage(page);
+    
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Subscription
+    await pageLicenses.createSubscription({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
@@ -292,14 +366,55 @@ test("Subscription with License" , async ({page}) => {
         quantity:"1000"
     });
 });
-test("Subscription without License" , async ({page}) => {
+test("Subscription without License with custom feilds" , async ({page}) => {
     const pageLicenses = new LicensePage(page);
     
     // Go to Licenses
     await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     // Create Subscription
     await pageLicenses.createSubscription({
-        newName:"Test",
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+test("Subscription without License without custom feilds" , async ({page}) => {
+    const pageLicenses = new LicensePage(page);
+    
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Subscription
+    await pageLicenses.createSubscription({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
+});
+test("Subscription without License without custom feilds but with vendor Validation" , async ({page}) => {
+    const pageLicenses = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    // Create Subscription
+    await pageLicenses.createSubscription({
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -469,17 +584,46 @@ test("Vendors", async ({page}) => {
     });
 
 
-test("Perpetual With License" , async({page}) => {
+test("Perpetual With License with custom fields" , async({page}) => {
     const pageLicenses = new LicensePage(page);
     
     // Go to Licenses
     await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     // Create Perpetuals
     await pageLicenses.createPerpetuals({
         newName:"Test",
+        appName:randomString,
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        basePrice:"0",
+        oneTimeFee:"0",
+        licenseName:"Pro",
+        cost:"1000",
+        discount:"0",
+        descriptionLicense:"Demo",
+        quantity:"1000",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+
+});
+
+test("Perpetual With License without custom fields" , async({page}) => {
+    const pageLicenses = new LicensePage(page);
+    
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Perpetuals
+    await pageLicenses.createPerpetuals({
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
-        vendorName:"Notion",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",
         ItOwner:"Jocker",
@@ -495,12 +639,48 @@ test("Perpetual With License" , async({page}) => {
 
 });
 
-test("Perpetual Without License" , async({page}) => {
+test("Perpetual Without License with custom fields" , async({page}) => {
     const pageLicenses = new LicensePage(page);
     await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     // Create Perpetuals
     await pageLicenses.createPerpetuals({
-        newName:"Test",
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test("Perpetual Without License without custom fields" , async({page}) => {
+    const pageLicenses = new LicensePage(page);
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Perpetuals
+    await pageLicenses.createPerpetuals({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
+    });
+});
+
+test("Perpetual Without License without custom fields but with vendor validation" , async({page}) => {
+    const pageLicenses = new LicensePage(page);
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Perpetuals
+    await pageLicenses.createPerpetuals({
+        newName:randomString,
         appName:"Asana",
         descName:"Demo",
         vendorName:"Notion",
@@ -509,7 +689,6 @@ test("Perpetual Without License" , async({page}) => {
         ItOwner:"Jocker",
         negotiationOwner:"Jocker"
     });
-
 });
 
 test ("Optimization" , async ({page}) => {
