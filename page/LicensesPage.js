@@ -13,6 +13,7 @@ export class LicensePage{
         this.clickOnPerpetual = "//a[@href='/licenses#allPerpetualContracts']";
         this.clickOnRenewals = "//span[normalize-space()='Renewals']";
         this.clickOnVendors = "//span[normalize-space()='Vendors']";
+        
 
         // Create Contract
         this.clickOnAdd = "//button[@class='appsad mr-3']";
@@ -106,10 +107,100 @@ export class LicensePage{
         // Custom Fields 
         this.cfApp = "//div[@class='row suggestion_menu_application_name_row']"; 
         this.cfUser = "//div[@class='row suggestion_menu_application_name_row']";
+
+        // Renewal Validation
+        this.clickOnListView = "//button[contains(@class,'z__button')]";
+        this.contractNameRenewalsPage = "//tbody/tr[1]/td[4]"
     }
 
     async goToLicenses(){
         await this.page.locator(this.clickOnLicenses).click();
+    }
+
+    async pollForSearchResult(searchName, totalDurationSec = 300, intervalSec = 20) {
+        const startTime = Date.now();
+        const endTime = startTime + (totalDurationSec * 1000);
+        const intervalMs = intervalSec * 1000;
+        let attemptCount = 0;
+    
+        while (Date.now() < endTime) {
+            attemptCount++;    
+            try {
+                // Refresh page and switch to list view at the start of each attempt (except first attempt)
+                if (attemptCount > 1) {
+                    await this.page.reload({ waitUntil: 'networkidle' });
+                    
+                    const listViewButton = this.page.locator(this.clickOnListView).first();
+                    await listViewButton.waitFor({ state: 'visible' });
+                    await listViewButton.click();
+                    
+                    await this.page.waitForTimeout(3000);
+                }
+    
+                const searchInput = this.page.getByPlaceholder('Search');
+                await searchInput.fill(searchName);
+                await this.page.waitForTimeout(3000);
+                await this.page.locator(this.contractNameRenewalsPage)
+                    .waitFor({ state: 'visible', timeout: 10000 });
+                    
+                const nameElement = this.page.locator(this.contractNameRenewalsPage);
+                const nameText = await nameElement.textContent();
+                // console.log("newName: ",nameText);
+               if (nameText === searchName) {
+                    expect(nameText).toEqual(searchName);
+                    return true; 
+                }
+    
+            } catch (error) {
+                expect.soft(true).toBeTruthy(`Attempt ${attemptCount} failed: ${error.message}`);
+            }
+            const remainingTime = endTime - Date.now();
+            if (remainingTime > intervalMs) {
+                await this.page.waitForTimeout(intervalMs);
+            }
+        }
+        throw new Error(`Failed to find "${searchName}" after ${attemptCount} attempts (${totalDurationSec} seconds)`);
+    }
+
+    async renewalValidation(testName){
+        const {
+            newName
+        } = testName;
+        // await this.page.reload({ waitUntil: 'domcontentloaded' });
+        // await this.navigateRenewals();
+        // await this.page.locator(this.clickOnListView).first().click();
+        // // await this.page.getByPlaceholder('Search').fill(newName);
+        // // await this.page.locator(this.contractNameRenewalsPage).waitFor({state: 'visible'});
+        // // const nameContract = await this.page.locator(this.contractNameRenewalsPage).textContent(); 
+
+        // // expect(nameContract).toEqual(newName);
+        // try {
+        //     await this.pollForSearchResult(newName, 300, 20);
+        // } catch (error) {
+        //     console.error('Polling failed:', error.message);
+        // }
+        try {
+            // Wait for page load after reload
+            await this.page.reload({ waitUntil: 'networkidle' });
+            
+            // Navigate and wait for list view
+            await this.navigateRenewals();
+            const listViewButton = this.page.locator(this.clickOnListView).first();
+            await listViewButton.waitFor({ state: 'visible' });
+            await listViewButton.click();
+            
+            // Execute polling with try-catch
+            await this.pollForSearchResult(newName)
+                .catch(async (error) => {
+                    await expect.soft(true).toBeTruthy(`Initial polling failed: ${error.message}`);
+                    // Optional: Add recovery steps here if needed
+                    throw error; // Re-throw to be caught by outer try-catch
+                });
+                
+        } catch (error) {
+            await expect.soft(true).toBeTruthy(`Renewal validation failed: ${error.message}`);
+            throw error; // Re-throw to fail the test
+        }
     }
 
     async checkCountOfTheContractt(vendorData){
@@ -773,7 +864,7 @@ export class LicensePage{
 
     }
     async navigateRenewals(){
-        await this.page.locator(this.clickOnRenewals);
+        await this.page.locator(this.clickOnRenewals).click();
     }
     async navigateVendors(){
         await this.page.locator(this.clickOnVendors).click();

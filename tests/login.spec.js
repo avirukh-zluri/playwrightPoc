@@ -126,6 +126,31 @@ test('Contract without License without custom fields but with Vendor Validation'
     });
 })
 
+test('Contract without License without custom fields but with Renewal Validation' , async ({page}) => {
+    test.setTimeout(360000);
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    try {
+        await license.goToLicenses();
+        await license.createContract({
+            newName:randomString,
+            appName:"Asana",
+            descName:"Demo",
+            primaryOwner:"Jocker",
+            financeOwner:"Jocker",
+            ItOwner:"Jocker",
+            negotiationOwner:"Jocker",
+        });
+        console.log(randomString);
+        await license.renewalValidation({
+            newName:randomString
+         });
+    } catch (error) {
+        console.error('Test failed:', error.message);
+        throw error;
+    }
+})
+
 test("Application " , async  ( {page} ) => {
     const application = new Application(page);
     
