@@ -15,7 +15,7 @@ export class LoginPage {
     }
 
     async goToLoginPage(page){
-        await this.page.goto('https://app.zluri.com');
+        await this.page.goto('https://app.zluri.com/');
         //https://app-release.zluri.com
     }
     async login (slugData){

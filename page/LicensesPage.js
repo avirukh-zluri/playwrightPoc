@@ -49,13 +49,13 @@ export class LicensePage{
 
         this.clickOnEndDate = "//div[contains(@class,'position-relative d-flex flex-row border-1 border-radius-4 font-12 align-items-center pl-1 pr-2 cursor-pointer')]//div[contains(text(),'End Date')]";
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 10);
+        endDate.setDate(endDate.getDate() + 3);
         const formattedEndDate = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         this.endDate = `//abbr[contains(@aria-label,'${formattedEndDate}')]`;
 
         this.clickOnRenewByDate = "//div[contains(text(),'Renew by Date')]";
         const renewDate = new Date();
-        renewDate.setDate(renewDate.getDate() + 7);
+        renewDate.setDate(renewDate.getDate() + 2);
         const formattedRenewDate = renewDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         this.reviewDate = `//abbr[contains(@aria-label,'${formattedRenewDate}')]`;
 
@@ -102,6 +102,10 @@ export class LicensePage{
 
         // Vendor Count
         this.vendorCount = "tbody tr:nth-child(1) td:nth-child(5)";
+
+        // Custom Fields 
+        this.cfApp = "//div[@class='row suggestion_menu_application_name_row']"; 
+        this.cfUser = "//div[@class='row suggestion_menu_application_name_row']";
     }
 
     async goToLicenses(){
@@ -144,7 +148,10 @@ export class LicensePage{
             tenure,
             discount,
             descriptionLicense,
-            quantity
+            quantity, 
+            CF1,
+            CF_APP,
+            CF_USER
         } = licensesData;
 
         if(vendorName){
@@ -258,6 +265,34 @@ export class LicensePage{
         await this.page.locator(this.reviewDate).click();
         // Payment Date
         await this.page.locator(this.paymentDate).click();
+
+        if(CF1 &&  CF_APP && CF_USER){
+            if(CF1){
+                await this.page.getByPlaceholder('Enter CF1').click();
+                await this.page.getByPlaceholder('Enter CF1').fill(CF1);
+            }
+            await setTimeout(2000);
+            // CF_2
+            await this.page.getByText('Select CF2').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+            await setTimeout(2000);
+            //CF_BOOLEAN
+            await this.page.getByText('Select CF_Boolean').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+
+            if(CF_APP){
+                await this.page.getByPlaceholder('CF_App').click();
+                await this.page.getByPlaceholder('CF_App').fill(CF_APP);
+                await this.page.locator(this.cfApp).first().click();
+                await setTimeout(2000);
+            }
+            if(CF_USER){
+                await this.page.getByPlaceholder('CF_User').click();
+                await this.page.getByPlaceholder('CF_User').fill(CF_USER);
+                await this.page.locator(this.cfUser).first().click();
+                await setTimeout(2000);
+            }
+        }
         
         await this.page.locator(this.clickOnNext1).click();
         await this.page.locator(this.clickOnNext2).click();
@@ -303,9 +338,12 @@ export class LicensePage{
         await this.page.locator(this.goBackToContractsPage).click();
         await this.page.locator(this.clickOnSearch).fill(contractName);
         await this.page.getByText(contractName).nth(0).click();
-
+        var expectedVendorName = null
+        if(vendorName){
+            expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        }
         const expectedAppName = await this.page.locator(this.appNameValidation).textContent();
-        const expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        
         const expectedPrimaryOwnerName = await this.page.locator(this.primaryOwnerNameValidation).textContent();
         const expectedFinanceOwnerName = await this.page.locator(this.financeOwnerNameValidation).textContent();
 
@@ -323,8 +361,6 @@ export class LicensePage{
             });
             console.log(`No. of Contracts with ${vendorName} as the Vendor after contract is created:`, count);
         }
-        
-        
     }
 
     async createSubscription (licensesData){
@@ -346,8 +382,25 @@ export class LicensePage{
             tenure,
             discount,
             descriptionLicense,
-            quantity
+            quantity,
+            CF1,
+            CF_APP,
+            CF_USER
         } = licensesData;
+
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor before creating a contract:`, count);
+        }
+
+        const baseURLFE = process.env.BASE_URL_FE;
+        if(vendorName){
+            await this.page.locator(this.clickOnLicenses2).click();
+        }
+
         await this.page.locator(this.clickOnSubscriptions).click();
         await this.page.locator(this.clickOnAdd).click();
 
@@ -359,7 +412,6 @@ export class LicensePage{
         await this.page.locator(this.clickToAddName).click();
 
         //Url Check 
-        const baseURLFE = process.env.BASE_URL_FE;
         const currentUrl = this.page.url();
         expect(currentUrl).toBe(`${baseURLFE}/subscription/new`);
 
@@ -399,8 +451,10 @@ export class LicensePage{
         // Description
         await this.page.locator(this.description).fill(descName);
         // Vendor Name
-        await this.page.locator(this.fillVendorName).fill(vendorName);
-        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        if(vendorName){
+            await this.page.locator(this.fillVendorName).fill(vendorName);
+            await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        }
         // Primary Owner
         await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
         await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
@@ -421,6 +475,34 @@ export class LicensePage{
         await this.page.getByRole('combobox').first().selectOption(renewalTermValue);
         await this.page.locator(this.clickOnDropDownRenewalTerms).click();
         await this.page.getByText(renewalTerm).nth(1).click();
+
+        if(CF1 &&  CF_APP && CF_USER){
+            if(CF1){
+                await this.page.getByPlaceholder('Enter CF1').click();
+                await this.page.getByPlaceholder('Enter CF1').fill(CF1);
+            }
+            await setTimeout(2000);
+            // CF_2
+            await this.page.getByText('Select CF2').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+            await setTimeout(2000);
+            //CF_BOOLEAN
+            await this.page.getByText('Select CF_Boolean').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+
+            if(CF_APP){
+                await this.page.getByPlaceholder('CF_App').click();
+                await this.page.getByPlaceholder('CF_App').fill(CF_APP);
+                await this.page.locator(this.cfApp).first().click();
+                await setTimeout(2000);
+            }
+            if(CF_USER){
+                await this.page.getByPlaceholder('CF_User').click();
+                await this.page.getByPlaceholder('CF_User').fill(CF_USER);
+                await this.page.locator(this.cfUser).first().click();
+                await setTimeout(2000);
+            }
+        }
 
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();
@@ -467,17 +549,30 @@ export class LicensePage{
         await this.page.locator(this.clickOnSearch).fill(subscriptionName);
         await this.page.getByText(subscriptionName).nth(0).click();
 
+
+        var expectedVendorName = null
+        if(vendorName){
+            expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        }
         const expectedAppName = await this.page.locator(this.appNameValidation).textContent();
-        const expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        
         const expectedPrimaryOwnerName = await this.page.locator(this.primaryOwnerNameValidation).textContent();
         const expectedFinanceOwnerName = await this.page.locator(this.financeOwnerNameValidation).textContent();
 
         expect(appName.toLowerCase()).toEqual(expectedAppName.toLowerCase());
-        expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        if(vendorName){
+            expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        }
         expect(primaryOwner.toLowerCase()).toEqual(expectedPrimaryOwnerName.toLowerCase());
         expect(financeOwner.toLowerCase()).toEqual(expectedFinanceOwnerName.toLowerCase());
-        
 
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor after contract is created:`, count);
+        }
     }
     async createPerpetuals(licensesData){
         const {
@@ -494,8 +589,24 @@ export class LicensePage{
             cost,
             discount,
             descriptionLicense,
-            quantity
+            quantity,
+            CF1,
+            CF_APP,
+            CF_USER
         } = licensesData;
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor before creating a contract:`, count);
+        }
+
+        const baseURLFE = process.env.BASE_URL_FE;
+        if(vendorName){
+            await this.page.locator(this.clickOnLicenses2).click();
+        }
+
         await this.page.locator(this.clickOnPerpetual).click();
         await this.page.locator(this.clickOnAdd).click();
 
@@ -507,7 +618,6 @@ export class LicensePage{
         await this.page.locator(this.clickToAddName).click();
 
         //Url Check 
-        const baseURLFE = process.env.BASE_URL_FE;
         const currentUrl = this.page.url();
         expect(currentUrl).toBe(`${baseURLFE}/perpetual/new`);
 
@@ -551,8 +661,10 @@ export class LicensePage{
         // Description
         await this.page.locator(this.description).fill(descName);
         // Vendor Name
-        await this.page.locator(this.fillVendorName).fill(vendorName);
-        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        if(vendorName){
+            await this.page.locator(this.fillVendorName).fill(vendorName);
+            await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        }
         // Primary Owner
         await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
         await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
@@ -570,6 +682,35 @@ export class LicensePage{
         await this.page.locator(this.startDate).click();
         // Payment Date
         await this.page.locator(this.paymentDate).first().click();
+
+        // Custom Feilds
+        if(CF1 &&  CF_APP && CF_USER){
+            if(CF1){
+                await this.page.getByPlaceholder('Enter CF1').click();
+                await this.page.getByPlaceholder('Enter CF1').fill(CF1);
+            }
+            await setTimeout(2000);
+            // CF_2
+            await this.page.getByText('Select CF2').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+            await setTimeout(2000);
+            //CF_BOOLEAN
+            await this.page.getByText('Select CF_Boolean').click();
+            await this.page.locator('.z__select--options__container--option').first().click();
+
+            if(CF_APP){
+                await this.page.getByPlaceholder('CF_App').click();
+                await this.page.getByPlaceholder('CF_App').fill(CF_APP);
+                await this.page.locator(this.cfApp).first().click();
+                await setTimeout(2000);
+            }
+            if(CF_USER){
+                await this.page.getByPlaceholder('CF_User').click();
+                await this.page.getByPlaceholder('CF_User').fill(CF_USER);
+                await this.page.locator(this.cfUser).first().click();
+                await setTimeout(2000);
+            }
+        }
 
         await this.page.locator(this.clickOnNext4).click();
         await this.page.locator(this.clickOnNext5).click();
@@ -606,15 +747,29 @@ export class LicensePage{
         await this.page.locator(this.clickOnSearch).fill(perpetualName);
         await this.page.getByText(perpetualName).nth(0).click();
 
+        var expectedVendorName = null
+        if(vendorName){
+            expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        }
         const expectedAppName = await this.page.locator(this.appNameValidation).textContent();
-        const expectedVendorName = await this.page.locator(this.vendorNameValidation).textContent();
+        
         const expectedPrimaryOwnerName = await this.page.locator(this.primaryOwnerNameValidation).textContent();
         const expectedFinanceOwnerName = await this.page.locator(this.financeOwnerNameValidation).textContent();
 
         expect(appName.toLowerCase()).toEqual(expectedAppName.toLowerCase());
-        expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        if(vendorName){
+            expect(vendorName.toLowerCase()).toEqual(expectedVendorName.toLowerCase());
+        }
         expect(primaryOwner.toLowerCase()).toEqual(expectedPrimaryOwnerName.toLowerCase());
         expect(financeOwner.toLowerCase()).toEqual(expectedFinanceOwnerName.toLowerCase());
+
+        if(vendorName){
+            await this.navigateVendors();
+            const count = await this.checkCountOfTheContractt({
+                vendorName:vendorName
+            });
+            console.log(`No. of Contracts with ${vendorName} as the Vendor after contract is created:`, count);
+        }
 
     }
     async navigateRenewals(){
