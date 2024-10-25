@@ -592,8 +592,8 @@ test("Perpetual With License with custom fields" , async({page}) => {
     const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
     // Create Perpetuals
     await pageLicenses.createPerpetuals({
-        newName:"Test",
-        appName:randomString,
+        newName:randomString,
+        appName:"Asana",
         descName:"Demo",
         primaryOwner:"Jocker",
         financeOwner:"Jocker",

@@ -49,13 +49,13 @@ export class LicensePage{
 
         this.clickOnEndDate = "//div[contains(@class,'position-relative d-flex flex-row border-1 border-radius-4 font-12 align-items-center pl-1 pr-2 cursor-pointer')]//div[contains(text(),'End Date')]";
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 10);
+        endDate.setDate(endDate.getDate() + 3);
         const formattedEndDate = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         this.endDate = `//abbr[contains(@aria-label,'${formattedEndDate}')]`;
 
         this.clickOnRenewByDate = "//div[contains(text(),'Renew by Date')]";
         const renewDate = new Date();
-        renewDate.setDate(renewDate.getDate() + 7);
+        renewDate.setDate(renewDate.getDate() + 2);
         const formattedRenewDate = renewDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         this.reviewDate = `//abbr[contains(@aria-label,'${formattedRenewDate}')]`;
 
@@ -361,8 +361,6 @@ export class LicensePage{
             });
             console.log(`No. of Contracts with ${vendorName} as the Vendor after contract is created:`, count);
         }
-        
-        
     }
 
     async createSubscription (licensesData){
@@ -453,8 +451,10 @@ export class LicensePage{
         // Description
         await this.page.locator(this.description).fill(descName);
         // Vendor Name
-        await this.page.locator(this.fillVendorName).fill(vendorName);
-        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        if(vendorName){
+            await this.page.locator(this.fillVendorName).fill(vendorName);
+            await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        }
         // Primary Owner
         await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
         await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
@@ -661,8 +661,10 @@ export class LicensePage{
         // Description
         await this.page.locator(this.description).fill(descName);
         // Vendor Name
-        await this.page.locator(this.fillVendorName).fill(vendorName);
-        await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        if(vendorName){
+            await this.page.locator(this.fillVendorName).fill(vendorName);
+            await this.page.locator(this.clickToAddVendorName).nth(0).click();
+        }
         // Primary Owner
         await this.page.locator(this.fillPrimaryOwner).fill(primaryOwner);
         await this.page.locator(this.clickToAddPrimaryOwner).nth(0).click();
