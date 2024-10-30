@@ -42,27 +42,29 @@ export class WorkflowPage{
         this.checkbox = page.getByRole('checkbox');
         this.continueButton = page.getByRole('button', { name: 'Continue' });
 
-    // Define locators for the elements
-    this.addAppButton = page.locator("//div[@class=' z-workflow-add-application-btn']//button");
-    this.appInput = page.getByPlaceholder('Add an app to the workflow');
-    this.zluriButton = page.getByRole('button', { name: 'Zluri Only manual tasks available', exact: true });
-    this.editTaskButton = page.getByRole('button', { name: 'Edit Task' });
-    this.assigneeInput = page.getByPlaceholder('Select an assignee');
-    this.saveTaskButton = page.getByRole('button', { name: 'Save Task' });
-    this.settingsTab = page.locator('#sidebar_tabs-tab-settings');
-    this.workflowNameInput = page.getByPlaceholder('Workflow Name');
-    this.updateButton = page.getByRole('button', { name: 'Update' });
-    this.workflowButton = page.getByRole('button', { name: 'Workflow' });
-    this.firstDraftName = page.locator("//table//tr[contains(@class,'able__row')][1]//td[1]");
-    this.draftOptionButtons = page.locator("//img[contains(@src,'optionsButton')]");
-    this.deleteDraftButton = page.locator("(//div[contains(text(),'Delete Draft')])[1]");
-    this.confirmDeleteDraftButton = page.locator("//button[contains(text(),'Delete')]");
-    this.deleteCompletedImage = page.locator("//img[contains(@src,'completeicon')]");
-    }
+        // Define locators for the elements
+        this.addAppButton = page.locator("//div[@class=' z-workflow-add-application-btn']//button");
+        this.appInput = page.getByPlaceholder('Add an app to the workflow');
+        this.zluriButton = page.getByRole('button', { name: 'Zluri Only manual tasks available', exact: true });
+        this.editTaskButton = page.getByRole('button', { name: 'Edit Task' });
+        this.assigneeInput = page.getByPlaceholder('Select an assignee');
+        this.saveTaskButton = page.getByRole('button', { name: 'Save Task' });
+        this.settingsTab = page.locator('#sidebar_tabs-tab-settings');
+        this.workflowNameInput = page.getByPlaceholder('Workflow Name');
+        this.updateButton = page.getByRole('button', { name: 'Update' });
+        this.workflowButton = page.getByRole('button', { name: 'Workflow' });
+        this.firstDraftName = page.locator("//table//tr[contains(@class,'able__row')][1]//td[1]");
+        this.draftOptionButtons = page.locator("//img[contains(@src,'optionsButton')]");
+        this.deleteDraftButton = page.locator("(//div[contains(text(),'Delete Draft')])[1]");
+        this.confirmDeleteDraftButton = page.locator("//button[contains(text(),'Delete')]");
+        this.deleteCompletedImage = page.locator("//img[contains(@src,'completeicon')]");
 
-
-
-
+        // Access Request 
+        this.clickOnNewRequest = "//button[normalize-space()='+ New Request']";
+        this.appNameValidation = "//div[@class='bold-600 font-18 ml-2 mr-1']";
+        this.requirementDescriptionValidation = "//div[contains(@class,'font-14 black-1 mt-2')]";
+        this.clickToApprove = "//button[normalize-space()='Approve Request']";
+      }
 
     // Functions Starts here
 
@@ -208,5 +210,92 @@ export class WorkflowPage{
       await this.confirmDeleteDraftButton.click();
       await expect(this.deleteCompletedImage).toBeVisible();
     }
+  }
+
+  async createAccessRequest(data){
+    const {
+      appName,
+      duration,
+      timePeriod,
+      requirementDescription
+    } = data
+    await this.page.locator(this.clickOnNewRequest).click();
+    await this.page.getByPlaceholder('App Name').click();
+    await this.page.getByPlaceholder('App Name').fill(appName);
+    await this.page.locator(`//div[contains(@class,'suggestion_menu_application_name text-capitalize')][normalize-space()='${appName}']`).click();
+    await this.page.getByRole('button', { name: 'Continue' }).click();
+    await this.page.getByPlaceholder('Enter Duration').click();
+    await this.page.getByPlaceholder('Enter Duration').fill(duration);
+    await this.page.getByRole('combobox').selectOption(timePeriod);
+    await this.page.getByPlaceholder('Your requirement.').click();
+    await this.page.getByPlaceholder('Your requirement.').fill(requirementDescription);
+    await this.page.getByRole('button', { name: 'Confirm Request' }).click();
+  }
+
+  async accessRequestValidationAndApproval(data){ 
+    const {
+      appName,
+      requirementDescription
+    } = data;
+    await this.page.getByPlaceholder('Search').fill(appName);
+    await this.page.getByPlaceholder('Search').click();
+    await this.page.locator('tr').filter({ has: this.page.getByText(`${requirementDescription}`) }).getByText(appName).click();
+    // await this.page.waitForTimeout(3000);
+    
+
+    // Validation 
+    // App Name
+    await this.page.locator(this.appNameValidation).waitFor({ state: 'visible' });
+    const receivedAppName = await this.page.locator(this.appNameValidation).textContent();
+    expect(receivedAppName.toLowerCase()).toEqual(appName.toLowerCase());
+
+    // Reason for Request
+    const receivedRequriementDescription = await this.page.locator(this.requirementDescriptionValidation).textContent();
+    expect(receivedRequriementDescription.toLowerCase()).toEqual(requirementDescription.toLowerCase());
+
+    const isApproverButtonVisible = async () => {
+      // await this.page.waitForTimeout(3000);
+      await this.page.reload();
+      await this.page.waitForTimeout(2000);
+      const button = await this.page.$('button:has-text("Approve Request"):not([disabled])');
+      if (!button) return false;
+      
+      return await button.isVisible() && 
+             !(await this.page.$('text="Request is being Processed"'));
+    };
+    const pollForElement = async (checkFn, timeout = 180000, interval = 10000) => {
+      const startTime = Date.now();
+      
+      while (Date.now() - startTime < timeout) {
+          try {
+              const result = await checkFn();
+              if (result) return true;
+              await this.page.waitForTimeout(10000);
+          } catch (error) {
+              await this.page.waitForTimeout(10000);
+          }
+      }
+      throw new Error(`Approver button not found after ${timeout/1000} seconds`);
+    };
+    try {
+      const buttonFound = await pollForElement(isApproverButtonVisible, 180000, 10000);
+      expect(buttonFound).toBe(true);
+      await this.page.locator(this.clickToApprove).click();
+      await this.page.getByPlaceholder('Please add a message').click();
+      await this.page.getByPlaceholder('Please add a message').fill('test');
+      await this.page.getByRole('button', { name: 'Approve Request' }).click();
+
+      // Complete Request
+      await this.page.getByRole('button', { name: 'Mark as complete' }).click();
+      await this.page.getByPlaceholder('Please add a message').click();
+      await this.page.getByPlaceholder('Please add a message').fill('test');
+      await this.page.getByRole('button', { name: 'Continue' }).click();
+    } 
+    catch (error) {
+      throw new Error(`Access Request validation failed: ${error.message}`);
+    }
+    //Approve Request
+    
+
   }
 }

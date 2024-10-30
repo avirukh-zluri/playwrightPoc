@@ -12,6 +12,11 @@ export class LoginPage {
         this.slugCheck = "//h3[normalize-space()='Enter Organization Slug']";
         this.enterSlug = "//input[@placeholder='eg. zluri']";
         this.clickOnSubmit = "//button[normalize-space()='Submit']";
+
+        // Employee View
+        this.clickOnProfileButton = "//img[@id='profileimage']";
+        this.clickToSwitchToEmployeeView = "//button[normalize-space()='Switch to Employee View']";
+        this.clickToSwitchToAdminView = "//button[normalize-space()='Switch To Admin View']";
     }
 
     async goToLoginPage(page){
@@ -34,4 +39,14 @@ export class LoginPage {
         await this.page.locator(this.continueButton).click();
         
     }
+
+  async switchToEmployeeView(){
+    await this.page.locator(this.clickOnProfileButton).click();
+    await this.page.locator(this.clickToSwitchToEmployeeView).click();
+  }
+
+  async switchToAdminView(){
+    await this.page.locator(this.clickOnProfileButton).click();
+    await this.page.locator(this.clickToSwitchToAdminView).click();
+  }
 }

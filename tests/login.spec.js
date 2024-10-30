@@ -141,7 +141,7 @@ test('Contract without License without custom fields but with Renewal Validation
             ItOwner:"Jocker",
             negotiationOwner:"Jocker",
         });
-        console.log(randomString);
+        // console.log(randomString);
         await license.renewalValidation({
             newName:randomString
          });
@@ -998,10 +998,16 @@ test ("Security" , async({page}) => {
     await PageSecurity.navigateToSecurity(page);
 });
 
-test("Access review" , async ({page}) => {
+test("Access review" ,async ({page}) => {
+    test.setTimeout(120000);
     const pageAccessReviews = new AccessReviewsPage(page);
     // Create Playbook
     const application = new Application(page);
+    const getFormattedCertName = () => {
+        const randomStr = Math.random().toString(36).substring(2, 7);
+        return `Demo_Cert_${randomStr}`;
+    };
+    const uniqueCertName = getFormattedCertName(); 
     await application.goToApplication();
     // await application.getMergedApplicationCount();
     await application.goToAllApp();
@@ -1012,9 +1018,9 @@ test("Access review" , async ({page}) => {
     });
         // Create Certificate
     await pageAccessReviews.goToAccessReviewsOngoing();
-    await setTimeout(3000);
+    await page.waitForTimeout(3000);
     await pageAccessReviews.createCertificate({
-        certName: "Demo Certificate 1",
+        certName: uniqueCertName,
         certOwner: "Pod4",
         certDescription: "Certificate for testing purposes",
         primaryReviewer: "jocker",
@@ -1029,10 +1035,10 @@ test("Access review" , async ({page}) => {
         name:"Asana"
     });
     await pageAccessReviews.goToAccessReviewsOngoing();
-    // await setTimeout(5000);
-    // await pageAccessReviews.certValidation({
-    //     certName:"Demo Certificate 1"
-    // });
+    await page.waitForTimeout(5000);
+    await pageAccessReviews.certValidation({
+        certName:uniqueCertName
+    });
     // await pageAccessReviews.archieveCert();
     // await pageAccessReviews.goToAccessReviewsUpcoming();
     // await pageAccessReviews.goToAccessReviewsCompleted();
@@ -1077,6 +1083,31 @@ test("Workflow " , async ({page}) => {
 //     await pageTasks.goToTasks();
 // });
 
+test ("Access Request" , async ( { page } ) => {
+    test.setTimeout(90000);
+    const randomString = 'Demo_' + Math.random().toString(36).substring(2, 7);
+    console.log("requirementDescription: ", randomString);
+    const Login = new LoginPage(page);
+    const pageWorkflows = new WorkflowPage(page);
+    await Login.switchToEmployeeView();
+    await pageWorkflows.goToWorkflowsAccessRequest();
+    await pageWorkflows.createAccessRequest({
+        appName:"Asana",
+        duration:"2",
+        timePeriod:"months",
+        requirementDescription:randomString
+    });
+    await page.waitForTimeout(2500);
+    await page.locator("//div[@class='ml-2']//img[@class='cursor-pointer']").click();
+    await Login.switchToAdminView();
+    await pageWorkflows.goToWorkflows();
+    await pageWorkflows.goToWorkflowsAccessRequest();
+    await pageWorkflows.accessRequestValidationAndApproval({
+        appName:"Asana",
+        requirementDescription:randomString
+    });
+
+})
 test("Delete palybook" , async({page}) => {
     const application = new Application(page);
     await application.goToApplication();
