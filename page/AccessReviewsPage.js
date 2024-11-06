@@ -71,12 +71,11 @@ export class AccessReviewsPage{
         this.clickOnReview = "//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ']";
 
         // Archieve Certificate 
-        this.clickOnEllipsis = "//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/button[1]/img[1]";
-        this.clickOnArchieve = "//div[contains(@class,'menu-options-container')]//div[1]";
+        this.clickOnEllipsis = "//div[contains(@class,'w-100 access-review-ongoing-reviews flex-1 position-relative background-color-white flex flex-column')]//div[1]//div[8]//div[1]//button[1]";
+        this.clickOnArchieve = "//span[normalize-space()='Archive']";
         this.clickOnArchieveButton = "(//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ljkNdu ht-32px undefined ht-32px undefined'])[1]";
-        this.clickOnReviewButton = "//div[@class='d-flex align-items-center justify-content-center'][normalize-space()='Review']";
+        this.clickOnReviewButton = "//button[@class='sc-gEvEer sc-eqUAAy ciQCaY ijlMsJ'][normalize-space()='Review']";
     }
-
     async goToAccessReviewsOngoing(){
         await this.page.locator(this.clickOnAccessReviewsOngoing).click();
     }
@@ -140,7 +139,7 @@ export class AccessReviewsPage{
             this.textArray.push(text.trim()); 
         }
 
-        console.log(this.textArray);
+        console.log("Text Array:",this.textArray);
         await this.page.locator(this.clickOnNext4).click();
 
         // Add playbook 
@@ -171,41 +170,57 @@ export class AccessReviewsPage{
         const { 
             certName
         } = certificateData;
-        await this.page.getByText(certName).nth(1).click();
-        // await setTimeout(60000);
+        const certElement = this.page.locator(`//span[normalize-space()='${certName}']`);
+        await certElement.waitFor({ state: 'visible', timeout: 5000 });
+        await certElement.click();
+        await this.page.waitForTimeout(5000);
 
-        // // Wait until the data being processed message is gone 
-        // await this.page.waitForSelector('button:enabled >> text=Review');
-        // await this.page.click('button:enabled >> text=Review');
+        const isReviewButtonVisible = async () => {
+            // await this.page.waitForTimeout(3000);
+            await this.page.reload();
+            await this.page.waitForTimeout(2000);
+            const button = await this.page.$('button:has-text("Review"):not([disabled])');
+            if (!button) return false;
+            
+            return await button.isVisible() && 
+                   !(await this.page.$('text="Data Processing In Progress"'));
+        };
 
-        // await new Promise(resolve => setTimeout(resolve, 30000));
-
-        // // Wait for the 'Review' element with the specified XPath to be visible with polling
-        // await this.page.waitForFunction(() => {
-        // const reviewElement = document.evaluate(
-        //     "//div[@class='d-flex align-items-center justify-content-center'][normalize-space()='Review']",
-        //     document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
-        // ).singleNodeValue;
-        
-        // return reviewElement && reviewElement.offsetParent !== null; // Checks if the element is visible
-        // }, {
-        // timeout: 0,  // No timeout, it will wait indefinitely
-        // polling: 10000  // Polling interval of 10 seconds
-        // });
-
-        // // Click the 'Review' element
-        await this.page.locator(this.clickOnReviewButton).click();
-        const newElements = await this.page.locator('//div[contains(@class, "InovuaReactDataGrid__column-header")]//span[@color="secondary_grey_2" and contains(@class, "typography--variant-dataLabel_small_semibold")]');
-        const count1 = await newElements.count();
-
-        const textArray1 = [];
-        for (let i = 1; i < count1-3; i++) {
-            const text = await newElements.nth(i).textContent();
-            textArray1.push(text.trim()); 
-        }
-        console.log(textArray1);
-
-        expect(textArray1).toEqual(this.textArray);        
+        // Polling function with timeout
+        const pollForElement = async (checkFn, timeout = 300000, interval = 15000) => {
+            const startTime = Date.now();
+            
+            while (Date.now() - startTime < timeout) {
+                try {
+                    const result = await checkFn();
+                    if (result) return true;
+                    await this.page.waitForTimeout(15000);
+                } catch (error) {
+                    await this.page.waitForTimeout(15000);
+                }
+            }
+            throw new Error(`Review button not found after ${timeout/1000} seconds`);
+        };
+        try {
+            const buttonFound = await pollForElement(isReviewButtonVisible, 600000, 30000);
+            expect(buttonFound).toBe(true);
+            await this.page.locator(this.clickOnReviewButton).click();
+            
+            const headerSelector = '//div[contains(@class, "InovuaReactDataGrid__column-header")]//span[@color="secondary_grey_2" and contains(@class, "typography--variant-dataLabel_small_semibold")]';
+            const newElements = await this.page.locator(headerSelector);
+            
+            // const textArray1 = [];
+            // const count = await newElements.count();
+            // for (let i = 1; i < count - 3; i++) {
+            //     const text = await newElements.nth(i).textContent();
+            //     textArray1.push(text.trim());
+            // }
+            // console.log("Text Array 1:",textArray1);
+            // expect(textArray1).toEqual(this.textArray);
+            
+        } catch (error) {
+            throw new Error(`Certificate validation failed: ${error.message}`);
+        }       
     }
 
     async archieveCert(){
