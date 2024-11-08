@@ -22,9 +22,9 @@ test.beforeEach(async ({ page }) => {
     await Login.goToLoginPage();
     await Login.login({
         userName:"pod4_automation_prod@zluri.dev",
-        //stacichadwick@zluri.dev
+       
         password:"test@123",
-        //61rzwgSXXjVuCBTTUygarg
+        
     });
     // await globalApiListener.startListening(page);
     // page.apiListener = globalApiListener;
@@ -454,7 +454,7 @@ test("Subscription without License without custom feilds but with vendor Validat
     });
 });
 
-test("Renewals", async ({page}) => {
+  test("Renewals", async ({page}) => {
         await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
         await page.locator("//span[normalize-space()='Renewals']").click();
 
@@ -463,8 +463,11 @@ test("Renewals", async ({page}) => {
         const text = await RenewalsHeadElement.textContent(); 
         expect(text).toBe("Renewals");
 
-        //GO TO GRID VIEW
-        await page.locator("//button[@class='z__button is-active normal']").click();
+        //GO TO GRID VIEW 
+
+        //on view data verification
+        //await page.locator("//div[@class='renewals__header']//div[@class='view-swicth d-inline-flex']//button[1]//img").click();
+        await page.locator("//div[@class='view-swicth d-inline-flex']//button[2]").click();
 
 
         //Selected month validation 
@@ -496,22 +499,252 @@ test("Renewals", async ({page}) => {
             console.log(`The cost of the selected month card matches with the right pannel cost -> ${monthcard_cost_element}`);
         }
 
+        //reminder set operation ------------------------------------------------------------------------------------------
+        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click();
+        const reminderButton = page.locator('//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]');
+        await reminderButton.waitFor({ state: 'visible' });
+        
+        // Get the button text
+        const buttonText = await reminderButton.textContent();
+        if (buttonText?.toLowerCase().includes('reminds on')) {
+          // If reminder exists, perform delete logic
+          await test.step('Delete existing reminder', async () => {
+            await reminderButton.click();
+            
+            // Wait for confirmation modal or dropdown
+            await page.locator("//div[contains(@class,'d-flex')]//img[contains(@class,'cursor-pointer')]").click();
+            await page.locator("//button[normalize-space()='Reset Reminder']").click();
+            
+            
+            // Verify reminder is removed
+            await expect(reminderButton).toHaveText(/Set Reminder/i);
+            await page.waitForTimeout(4000);
+           
+          });
+        } 
+          // If no reminder exists, set new reminder
+          await test.step('Set new reminder', async () => {
+            await reminderButton.click();
+            await page.locator('input.flex-fill.remind__input[type="number"]').fill("1");
+            await page.locator('button.z__button.undefined', { hasText: 'Set Reminder' }).click();
+            
+           //verify
+            await expect(reminderButton).toContainText('Reminds on');
+          });
+        
         
         //month card
-        await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click()
-        await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
-        await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
+        // await page.locator("//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@role='navigation']/div/div[@class='renewals__body pl-5 pr-5 pt-3']/div[contains(@class,'grid__container d-flex')]/div[contains(@class,'block block__year flex-grow-1 d-inline-flex flex-wrap mr-3')]/div[2]").click()
+        // await page.locator("//body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[2]/button[1]").click();
+        // await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
 
+
+        //set reminder verification --to be modified
         const notification_message_renewal_ele = await page.locator("//div[@class='notification_title']");
-        const  notification_message_renewal= await notification_message_renewal_ele.textContent(); 
-        expect(notification_message_renewal).toBe("Reminder successfully updated");
+       // const  notification_message_renewal= await notification_message_renewal_ele.textContent(); 
+       // expect(notification_message_renewal).toBe("Reminder successfully updated");
+
+        //to be updated on sheet
+        //go to the List view-------------------------------------------------------------------------
+        await page.locator("//div[@class='view-swicth d-inline-flex']//button[1]").click();
+        await page.waitForTimeout(1000);
+        //sort ->click on sort arrow
+        await page.locator("//table[@class='table table-hover mb-0']//thead[@class='new-infinite-table-header']/tr/th[1]/div//div[@class='table-header-sort-icons'][1]//img[1]").click();
+        
+        //go to top set reminder to be added if text is edit reminder it will delete reminder then set reminder
+        //other wise set reminder 
+        await page.locator('//tbody/tr[1]//td[7]//div[contains(@class,"position-relative renewal_table_reminder")]//button').click();
+        await page.locator("//div[@class='row d-flex flex-column grow']//div[1]//div[1]//input").fill("2");
+        await page.locator("//div[@class='row d-flex flex-column grow']//div[3]//button[@class='z__button undefined']").click();
+        
+        //Main view ->go and add new view
+        await page.locator("//div[@class='z__select text-capitalize mr-3 mt-auto mb-auto']//div[@class='z__select--input dropdown-click']").click();
+        await page.locator("//span[contains(@class, 'typography--variant-subheading_2_regular') and text()='Save Custom View']").click();
+        await page.locator("//div[@class='modal-content']//div[@class='bg-white rounded-top modal-body']//div[@class='p-3']//input[@name='Name' and @placeholder='Name']").fill("sdet-view");
+        await page.locator("//div[@class='modal-content']//div[@class='bg-white rounded-top modal-body']//div[@class='p-3']//input[@name='Description' and @placeholder='Description']").fill("automation-view for test");
+        await page.locator("//button[@type='button' and @class='btn btn-primary' and text()='Save']").click();
+        //validation that filter has been added
+        await expect(async () => {
+            const text = await page.locator("//span[@class='truncate_10vw']").textContent();
+            expect(text).toBe("sdet-view", `Expected text to be 'sdet-view' but found '${text}'`);
+          }).toPass({timeout: 2000});
+
+
+        //delete view
+        await page.locator("//div[@class='z__select text-capitalize mr-3 mt-auto mb-auto']//div[@class='z__select--input dropdown-click']").click();
+        try {
+            
+            const viewRow = page.locator("//span[contains(@class, 'sc-iCZwEW') and text()='sdet-view']");
+            const isViewVisible = await viewRow.isVisible({ timeout: 1000 });
+            
+            if (isViewVisible) {
+                const deleteButton = page.locator("//div[.//span[text()='sdet-view']]//img[@alt='delete']");
+                await deleteButton.click();
+                await page.locator("button.btn-danger:has-text('Delete')").click();
+                
+                // Verify deletion (wait for element to disappear)
+                await expect(viewRow).not.toBeVisible({ 
+                    timeout: 1000,
+                    message: "Custom view 'sdet-view' should be deleted"
+                });
+                
+                console.log("Successfully deleted 'sdet-view'");
+            } else {
+                console.log("'sdet-view' not found");
+            }
+        } catch (error) {
+            console.error(`Error while deleting custom view: ${error}`);
+        }
+
+
+
+        //pagenation------------------------------------------------------------------------------------------
+        await page.waitForSelector('tbody#scrollRoot');
+        await page.waitForSelector('.table__row__select');
+
+  // Function to get total rows
+  async function getTableRowCount() {
+    const rows = await page.locator('tbody#scrollRoot tr.table__row').all();
+    return rows.length;
+  }
+
+  // Function to get selected dropdown value
+  async function getSelectedRowsValue() {
+    const selectedValue = await page.locator('.table__row__select').evaluate(select => select.value);
+    return parseInt(selectedValue);
+  }
+
+  // First check with default selection
+  const initialRowCount = await getTableRowCount();
+  const initialSelectedValue = await getSelectedRowsValue();
+  
+  console.log(`Initial row count: ${initialRowCount}`);
+  console.log(`Selected value in dropdown: ${initialSelectedValue}`);
+
+  //assertion
+  expect(initialRowCount, 'Number of rows should not exceed selected value').toBeLessThanOrEqual(initialSelectedValue);
+
+  //page 1 of total count validation
+  
+  async function getTotalRenewalsCount(page) {
+    const countText = await page.locator('.d-flex.z_table_chips .mx-1').first().textContent();
+    const count = countText.match(/Showing (\d+) Renewals/);
+    return count ? parseInt(count[1]) : 0;
+}
+      const totalRenewals = await getTotalRenewalsCount(page);
+      const totalPages = Math.ceil(totalRenewals / initialSelectedValue);
+      console.log(totalPages);
+
+      for(let i=1;i<totalPages;i++ ){
+        const rightArrow = page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]');
+
+        // Verify arrow is present and clickable
+        await expect(rightArrow, 'Right arrow should be visible').toBeVisible();
+        await expect(rightArrow, 'Right arrow should be enabled').toBeEnabled();
+        await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+      }
+      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+        //Filter-------------------------------------------------------------------------------------------
+        //read initial count ->set filter ->read final count-try to delete the filter ->read the count
+        //fltercout before
+        //const filterContainer = page.locator("div.cursor-pointer.align-items-center.d-flex.h-100");
+        const filterContainer = page.locator('//div[contains(@class, "cursor-pointer")]//span[text()="Filter"]/parent::div[.//div[contains(@class, "filterModal_NumberPill")]]');
+        // Locate the filter count element
+        const filterCount = page.locator("div.filterModal_NumberPill");
+        
+        // Read the filter count before clicking
+        const count_before = await filterCount.textContent();
+        console.log(`Before filter count: ${count_before}`);
+        
+        // Click on the filter
+        await filterContainer.click();
+        
+        //filter oeprations
+        await page.locator("//div[contains(@class, 'applied_filters_modal_button') and contains(text(), '+ Add Filters')]").click();
+        await page.locator("//input[@placeholder='Search Filters' and @style='width: 250px; border: 0px; font-size: 14px; padding: 4px;']").fill("application name");
+
+        const addButton = page.locator("img#app_name");
+        await addButton.click();
+        
+        // Wait for input field to be visible and fill it
+        const inputField = page.locator("//input[@id='formBasicCheckbox' and @placeholder='Enter value' and @type='text']");
+        await inputField.waitFor({ state: 'visible', timeout: 1000 });
+        
+        // Clear any existing value and fill new value
+        await inputField.clear();
+        await inputField.fill("asana");
+        await page.locator("//button[@class='btn btn-primary btn-sm' and text()='Apply']").click();
+        await page.waitForTimeout(1000);
+        //fltercout after
+        
+        // Locate the filter count element
+        const filterCountafter = page.locator("div.filterModal_NumberPill");
+        
+        // Read the filter count after clicking
+        const countafter = await filterCountafter.textContent();
+        console.log(`After filter count: ${countafter}`);
+       
+
+        //validate after filter 1st name element app name matches entered value
+        //Refresh
+        await page.locator('//button[contains(@class, "appsad")]//img[contains(@src, "refresh")]').click();
+        const filterCountafter_refresh = page.locator("div.filterModal_NumberPill");
+        const countafter_refresh = await filterCountafter_refresh.textContent();
+        console.log(`After refresh filter count: ${countafter_refresh}`);
+
+        //remove filter
+        //await page.locator('//div[contains(@class, "cursor-pointer") and contains(@class, "d-flex") and contains(@class, "align-items-center")][.//span[text()="Filter"]]').click();
+       await page.locator('//div[contains(@class, "cursor-pointer")]//span[text()="Filter"]/parent::div[.//div[contains(@class, "filterModal_NumberPill")]]').click();
+        await page.locator('//div[contains(@class, "applied_filters_modal_content_row")][.//span[text()="asana"]]//img[contains(@src, "cross-filter")]').click();
+        await page.reload();
+        
+        //Slelect column
+        //Search
+        await page.locator("//div[@class='view-swicth d-inline-flex']//button[1]").click();
+        await page.locator('//div[contains(@class, "inputWithIconApps")]/input[@type="text" and @placeholder="Search"]').fill("Asana");
+
+        //Export
+        await page.locator('//button[contains(@class, "export") and .//span[text()="Export"]]').click();
+        await page.locator("//div[@class='pt-1 form-check']//input[@type='checkbox']").click();
+        await page.locator("//button[normalize-space()='Start Export']").click();
+        await page.locator("//button[normalize-space()='Close']").click();
+        //Edit pagenation
+
+
+        //setting and removing of all filters
+        const filterButton2 = page.locator('//div[contains(@class, "cursor-pointer") and contains(@class, "align-items-center")][.//span[text()="Filter"]][.//div[contains(@class, "filterModal_NumberPill")]]');
+        const addfilter_button = page.locator("//div[contains(@class, 'applied_filters_modal_button') and contains(text(), '+ Add Filters')]");
+        const apply_button = page.locator("//button[normalize-space()='Apply']");
+
+        //filter 1
+        await filterButton2.click();
+        await addfilter_button.click();
+
+        
+    await page.waitForSelector('.allapps__filter__item');
+    await page.locator('img[id="app_name"]').click();
+    await page.waitForSelector('.collapse >> visible=true');
+    const input_box = page.locator('input[placeholder="Enter value"][type="text"][id="formBasicCheckbox"]');
+    const input_box_small = page.locator('div.collapse.show input[placeholder="Enter value"][type="text"][id="formBasicCheckbox"].mt-2.form-control');
+    await input_box_small.fill('asana');
+       
+    await apply_button.click();
+
+    //remove filter 1
+    await filterButton2.click();
+    await page.locator('//div[contains(@class, "applied_filters_modal_content_row")][.//span[text()="asana"]]//img[contains(@src, "cross-filter")]').click();
+
+
     });
 
 test("Vendors", async ({page}) => {
         await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
         await page.locator("//span[normalize-space()='Vendors']").click();
 
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(2000);
         //name validation
         const vendorHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
         const vendor_head_text = await vendorHeadElement.evaluate(el => el.childNodes[0].textContent.trim());
@@ -551,7 +784,7 @@ test("Vendors", async ({page}) => {
         // await page.locator("//input[@placeholder='Email']").fill("enteremail@gmail.com");
         await page.getByRole('button', { name: 'Add Vendor' }).click();
 
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(2000);
 
 
         //intermediade vendor count
@@ -564,7 +797,7 @@ test("Vendors", async ({page}) => {
         
         //verify the existance of the added vendor
         await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill(vendor_name);
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(2000);
 
 
             //verify the vendor must exist
@@ -577,10 +810,10 @@ test("Vendors", async ({page}) => {
             await page.waitForTimeout(2000);
             await page.locator("//div[@class='Uploads__right']//div[1]//a[@class='cursor-pointer autho__dd__cont ml-3 mt-auto mb-auto text-decoration-none']//div").click();
             await page.locator("//a[normalize-space()='Delete Vendors']").click();
-            await page.waitForTimeout(4000);
+           // await page.waitForTimeout(1000);
 
             await page.reload();
-            await page.waitForTimeout(4000);
+            await page.waitForTimeout(1000);
             const vendor_count_Element_post_delelte = await page.locator("//div[@class='mx-1']");
             const vendor_count_text_post_delelte = await vendor_count_Element_post_delelte.textContent(); 
            
@@ -591,7 +824,7 @@ test("Vendors", async ({page}) => {
 
         expect(numberOfVendors).toBe(numberOfVendors_post_delelte);
         console.log(`Vendor count post deletion ${vendor_count_text_post_delelte}`);
-        await page.waitForTimeout(5000);
+        //await page.waitForTimeout(1000);
         //show summary
         await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
         await page.locator("//div[@class='d-flex justify-content-center align-items-center ml-2 py-1 px-2 border-radius-8 light-blue-bg font-10 bold-400']//img[@alt='toggle']").click(); 
@@ -669,7 +902,7 @@ test("Vendors", async ({page}) => {
     //submit
     await page.locator("//button[normalize-space()='Apply']").click();
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
 
     // Get all header elements
     const headers = await page.locator("//div[@class='table-header-text']").allTextContents();
@@ -692,7 +925,7 @@ test("Vendors", async ({page}) => {
     //submit
     await page.locator("//button[normalize-space()='Apply']").click();
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
 
     // Get all header elements
     const headers_after = await page.locator("//div[@class='table-header-text']").allTextContents();
@@ -732,7 +965,7 @@ test("Vendors", async ({page}) => {
     //page reload
     await page.locator("//img[@class='w-100 h-100 m-auto']").click();
     console.log("Reload triggered");
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     //Remove Filter
     await page.locator("//div[@class='top__Uploads']//div[1]//div[2]//span[@class='grey font-13 mr-2']").click();
    // await page.waitForTimeout(1000);
@@ -741,7 +974,7 @@ test("Vendors", async ({page}) => {
     console.log("Remove-Filter Operation worked correctly,this also indicates that filter wass maintained after reload");
     //await page.waitForTimeout(1000);
     await page.reload();
-    await page.waitForTimeout(1000);
+   // await page.waitForTimeout(1000);
 
     //Export
     await page.locator("//button[@class='export mt-auto mb-auto mr-3']").click();
@@ -751,6 +984,18 @@ test("Vendors", async ({page}) => {
     console.log("Export is triggered successfully");
 
     //Reload
+
+
+    //Notes for specific vendor
+    await page.locator("//div[@class='top__Uploads']//div[@class='Uploads__right']//input").fill("TestVendor347");
+    await page.locator('a.table-link', { hasText: 'TestVendor347' }).click();
+    await page.locator("//div[@class='text-center border-dashed p-5 cursor-pointer']//img").click();
+    await page.locator("//textarea[@placeholder='Add a Note']").fill("Automation test note");
+    await page.locator("//button[normalize-space()='Save']").click();
+    await page.waitForTimeout(1000);
+    await page.locator('div.notes-drawer div.note div.note-footer div.dropdown a.cursor-pointer:has(img[src*="ellipsis-v"])').click();
+    await page.getByRole('button', { name: 'Delete Note' }).click();
+    await page.locator("//img[@alt='Close']").click();
 
     });
 
@@ -873,6 +1118,45 @@ test ("Optimization" , async ({page}) => {
     const text_optimization = await OptimizationHeadElement.textContent(); 
     expect(text_optimization).toBe("Optimization Summary");
     console.log(`Hey we are on ${text_optimization} page !!`);
+
+    //sub-heading validations
+    const subhead1 = await page.locator('.optimization_summary_meta_title .font-14').textContent();
+    
+    expect(subhead1) .toBe('Savings Opportunity', 
+      'Header section should display "Savings Opportunity"');
+  
+  // First card assertion
+  let subhead2 = await page.locator('.optimization_summary_meta_card:nth-child(2) .font-14').textContent();
+  subhead2 = subhead2.trim().replace(/i$/, '');
+  expect(subhead2)
+    .toBe('Savings under review',
+      'First card should display "Savings under review"');
+  
+  // Second card assertion
+  let subhead3 = await page.locator('.optimization_summary_meta_card:nth-child(3) .font-14').textContent();
+  subhead3 = subhead3.trim().replace(/i$/, '');
+  expect(subhead3)
+    .toBe('Estimated realized savings',
+      'Second card should display "Estimated realized savings"');
+
+
+
+      //refresh button validation 
+
+    const refreshButton = page.locator('.optimization_summary_refresh_button');
+
+    // Check if button is visible
+    await expect(refreshButton).toBeVisible({
+      timeout: 1000,
+      message: 'Refresh button should be visible on the page'
+    });
+
+    // Check if button is enabled and clickable
+    await expect(refreshButton).toBeEnabled({
+      timeout: 1000,
+      message: 'Refresh button should be enabled and clickable'
+    });
+
 
     //-----------------------------ON--PAGE----CURRENCY-----VALIDATION-----------------------------------------
     async function checkSavingsElements(page) {
@@ -1107,8 +1391,23 @@ async function validateRowLinks(page) {
         // Click on the text to open the new page by using a more specific locator within the row context
         await page.locator('div.d-flex div.optimization_summary_app_cell div:has-text("' + valueApp + '")').click();
 
-        await page.waitForTimeout(1000);
+        //await page.waitForTimeout(1000);
         // Read the text at the specified locator on the new page
+
+        // const currentUrl = page.url();
+        // const urlPattern = /^https:\/\/app\.zluri\.com\/applications\/[a-f0-9]+#optimization$/;
+        // await expect(currentUrl).toMatch(urlPattern,`URL ${currentUrl} doesn't match expected pattern`);
+
+        const currentUrl = page.url();
+    // Combined pattern using regex alternation (|) to match either URL format
+    const urlPattern = /^https:\/\/(?:app|app-release)\.zluri\.com\/applications\/[a-f0-9]+#optimization$/;
+    
+    await expect(currentUrl, `URL ${currentUrl} doesn't match expected pattern. 
+        Expected format: 
+        - https://app.zluri.com/applications/{id}#optimization
+        - https://app-release.zluri.com/applications/{id}#optimization`
+    ).toMatch(urlPattern);
+
         const breadcrumbText = await page.locator("//div[@class='ins-1']//nav//ol//li[1]//div[@class='truncate_breadcrumb_item_name']").textContent();
 
         // Validate with the previous page name
@@ -1126,7 +1425,249 @@ async function validateRowLinks(page) {
     // function call
     await validateRowLinks(page);    
 
+
+    //validation fo the optimization license cost
+
+    async function extractNumber(text) {
+        // Handle dash '-' case
+        if (text === '-') return 0;
+        // Remove currency symbols, commas and convert to number
+        return parseFloat(text.replace(/[$,\s]/g, '')) || 0;
+    }
+
+    async function validateColumnSums() {
+        
+            // Get all rows using the specific class
+            const rows = await page.locator('tr.optimization_summary_table_body_row').all();
+    
+            for (let i = 0; i < rows.length; i++) {
+                // Get app name for better reporting
+                const appName = await rows[i].locator('.optimization_summary_app_cell div').first().textContent();
+                
+                // Get values from columns 4, 5, and 6
+                const column4Value = await rows[i].locator('td:nth-child(4) div').textContent();
+                const column5Value = await rows[i].locator('td:nth-child(5) div').textContent();
+                const column6Value = await rows[i].locator('td:nth-child(6) div').textContent();
+    
+                // Convert to numbers
+                const col4Num = await extractNumber(column4Value);
+                const col5Num = await extractNumber(column5Value);
+                const col6Num = await extractNumber(column6Value);
+    
+                // Calculate sum
+                const sumOf5And6 = col5Num + col6Num;
+                if(sumOf5And6 == col4Num){
+                    console.log(`Validation successful for ${appName} for obtimizable licenses`);
+                }
+            }
+    }
+
+    await validateColumnSums(page);
 //cross validation with optimization page cost --->>> in app optimizatio cost
+
+//redirection validation in optimizable licenses-------------------------------------------------------------------
+
+await page.waitForSelector('.optimization_summary_table_body');
+
+// Get all main rows with dropdown arrows
+const mainRows = await page.locator('.optimization_summary_table_body_row').filter({
+  has: page.locator('.optimization_summary_toggle_license_display_cell img[src*="downarrow"]')
+}).all();
+
+// Process each main row
+for (const mainRow of mainRows) {
+  try {
+    // Find and click dropdown arrow
+    const dropdownArrow = await mainRow.locator('.optimization_summary_toggle_license_display_cell img');
+    await dropdownArrow.click();
+    await page.waitForTimeout(2000);
+
+    // Wait for expanded rows
+    await page.waitForSelector('tr.optimization_summary_table_body_row');    
+    // Get all inner rows that appear after clicking dropdown
+    const innerRows = await page.locator('tr.optimization_summary_table_body_row').all();
+
+    // Process each inner row
+    for (const innerRow of innerRows) {
+      try {
+        // Get the fourth column (index 3) licenses element
+        const licenseElement = await innerRow.locator('td').nth(3).locator('.d-flex');
+        const licenseText = await licenseElement.textContent();
+        
+        // Skip if empty or not a number
+        if (!licenseText || licenseText.trim() === '') {
+         // console.log('Skipping: Empty value in licenses column');
+          continue;
+        }
+
+        const licenseCount = parseInt(licenseText.trim());
+        
+        // Skip if not a valid number or zero
+        if (isNaN(licenseCount) || licenseCount <= 0) {
+          console.log(`zero value (${licenseText})`);
+          continue;
+        }
+
+        // Check if element is clickable
+        const isClickable = await licenseElement.evaluate(el => {
+          return el.classList.contains('cursor-pointer') || 
+                 el.classList.contains('text-underline') ||
+                 window.getComputedStyle(el).cursor === 'pointer';
+        });
+
+        if (isClickable) {
+          console.log(`Found clickable license count: ${licenseCount}`);
+          
+          // Click the license number
+          await licenseElement.click();
+          
+          // Wait for new page content and validate
+          try {
+            await page.waitForSelector('.d-flex.z_table_chips', { timeout: 3000 });
+            
+            // Get and validate user count
+            const userCountText = await page.locator('.d-flex.z_table_chips .mx-1').textContent();
+            const userCount = parseInt(userCountText.match(/Showing (\d+) Users/)?.[1] || '0');
+            console.log(`Validated: Found ${userCount} users`);
+            
+            // Navigate back
+            await page.goBack();
+            
+            // Wait for original table to be visible
+            await page.waitForSelector('.optimization_summary_table_body');
+          } catch (navigationError) {
+            console.error('Error during navigation or validation:', navigationError);
+            // Ensure we're back at the original table
+            if (!await page.locator('.optimization_summary_table_body').isVisible()) {
+              await page.goBack();
+              await page.waitForSelector('.optimization_summary_table_body');
+            }
+          }
+        } else {
+         console.log(`Skipping: Number ${licenseCount} is not clickable`);
+        }
+      } catch (innerError) {
+        console.error('Error processing inner row:', innerError);
+        continue;
+      }
+    }
+
+    // Close the dropdown
+    await dropdownArrow.click();
+    await page.waitForTimeout(500); // Small delay after closing
+
+  } catch (mainError) {
+    console.error('Error processing main row:', mainError);
+    continue;
+  }
+}
+
+
+async function license_redirection_validation(i){
+   //await page.waitForSelector('.optimization_summary_table_body');
+
+// Get all main rows with dropdown arrows
+const mainRows1 = await page.locator('.optimization_summary_table_body_row').filter({
+  has: page.locator('.optimization_summary_toggle_license_display_cell img[src*="downarrow"]')
+}).all();
+
+// Process each main row
+for (const mainRow1 of mainRows1) {
+  try {
+    // Find and click dropdown arrow
+    const dropdownArrow1 = await mainRow1.locator('.optimization_summary_toggle_license_display_cell img');
+    await dropdownArrow1.click();
+    await page.waitForTimeout(500);
+
+    // Wait for expanded rows
+    await page.waitForSelector('tr.optimization_summary_table_body_row');    
+    // Get all inner rows that appear after clicking dropdown
+    const innerRows1 = await page.locator('tr.optimization_summary_table_body_row').all();
+
+    // Process each inner row
+    for (const innerRow1 of innerRows1) {
+      try {
+        // Get the fourth column (index 3) licenses element
+        const licenseElement1 = await innerRow1.locator('td').nth(i).locator('.d-flex');
+        const licenseText1 = await licenseElement1.textContent();
+        
+        // Skip if empty or not a number
+        if (!licenseText1 || licenseText1.trim() === '') {
+         // console.log('Skipping: Empty value in licenses column');
+          continue;
+        }
+
+        const licenseCount1 = parseInt(licenseText1.trim());
+        
+        // Skip if not a valid number or zero
+        if (isNaN(licenseCount1) || licenseCount1 <= 0) {
+          console.log(`zero value (${licenseText1})`);
+          continue;
+        }
+
+        // Check if element is clickable
+        const isClickable1 = await licenseElement1.evaluate(el => {
+          return el.classList.contains('cursor-pointer') || 
+                 el.classList.contains('text-underline') ||
+                 window.getComputedStyle(el).cursor === 'pointer';
+        });
+
+        if (isClickable1) {
+          console.log(`Found clickable license count: ${licenseCount1}`);
+          
+          // Click the license number
+          await licenseElement1.click();
+          
+          // Wait for new page content and validate
+          try {
+            await page.waitForSelector('.d-flex.z_table_chips', { timeout: 3000 });
+            
+            // Get and validate user count
+            const userCountText1 = await page.locator('.d-flex.z_table_chips .mx-1').textContent();
+            const userCount1 = parseInt(userCountText1.match(/Showing (\d+) Users/)?.[1] || '0');
+            console.log(`Validated: Found ${userCount1} users`);
+            
+            // Navigate back
+            await page.goBack();
+            
+            // Wait for original table to be visible
+            await page.waitForSelector('.optimization_summary_table_body');
+          } catch (navigationError) {
+            console.error('Error during navigation or validation:', navigationError);
+            // Ensure we're back at the original table
+            if (!await page.locator('.optimization_summary_table_body').isVisible()) {
+              await page.goBack();
+              await page.waitForSelector('.optimization_summary_table_body');
+            }
+          }
+        } else {
+         console.log(`Skipping: Number ${licenseCount1} is not clickable`);
+        }
+      } catch (innerError) {
+        console.error('Error processing inner row:', innerError);
+        continue;
+      }
+    }
+
+    // Close the dropdown
+    await dropdownArrow1.click();
+    await page.waitForTimeout(500); // Small delay after closing
+
+  } catch (mainError) {
+    console.error('Error processing main row:', mainError);
+    continue;
+  }
+}
+
+}
+
+//call
+console.log("validation for the Undeprovisioned Licenses");
+await license_redirection_validation(4);
+console.log("validation for the Unused Licenses");
+await license_redirection_validation(5);
+
+
 
 
 });
