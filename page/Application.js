@@ -30,7 +30,7 @@ export class Application {
         this.clickOnAutomation = "//a[normalize-space()='Automation']";
         this.clickOnDeprovisioning = "//li[normalize-space()='Deprovisioning']";
         this.clickOnAdd = "//button[@class='appsad mr-3']";
-        this.clickToAddAction = "(//img[@class='mr-1'])[81]";
+        this.clickToAddAction = "(//img[@class='mr-1'])";
         this.writeAction = "//input[@placeholder='Select an action']";
         this.clickToAddTask = "//div[@class='z-select-option']";
         this.playbookAction = "//body/div[@id='root']/div/div[@class='large-screen-only']/div/div[@class='container-fluid']/section/div[@class='row']/div[@class='col-md-8 d-flex flex-column pt-5 pb-10 align-items-center actions_info_card']/div[@class='d-flex flex-column align-items-center actions_container']/div[@class='d-flex flex-column']/div[@class='white-bg']/div[@class='p-4 z-w-add-action']/div/div/div[1]";
@@ -173,14 +173,14 @@ export class Application {
         //         await popupPage.close();
         //     }
         // }
-        await setTimeout(700);
+        await setTimeout(2000);
         await this.page.locator(this.clickToAddAction).click();        
         await setTimeout(700);
-        await this.page.locator(this.writeAction).click();
-        await setTimeout(700);
-        await this.page.locator(this.writeAction).fill(actionName);
-        await setTimeout(700);
-        await this.page.locator(this.clickToAddTask).click();
+        // await this.page.locator(this.writeAction).click();
+        // await setTimeout(700);
+        // await this.page.locator(this.writeAction).fill(actionName);
+        // await setTimeout(700);
+        // await this.page.locator(this.clickToAddTask).click();
         
         await this.page.locator('//div[contains(@class, "z-select-selector")]', { hasText: 'Select a manual action template' }).click();       
         await this.page.locator('//div[contains(@class , "z-select-option ")]').filter({ hasText: playbookActionName }).click();

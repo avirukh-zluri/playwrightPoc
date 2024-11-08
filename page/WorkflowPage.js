@@ -254,36 +254,67 @@ export class WorkflowPage{
     expect(receivedRequriementDescription.toLowerCase()).toEqual(requirementDescription.toLowerCase());
 
     const isApproverButtonVisible = async () => {
-      // await this.page.waitForTimeout(3000);
-      await this.page.reload();
-      await this.page.waitForTimeout(2000);
-      const button = await this.page.$('button:has-text("Approve Request"):not([disabled])');
-      if (!button) return false;
-      
-      return await button.isVisible() && 
-             !(await this.page.$('text="Request is being Processed"'));
+        await this.page.reload();
+        // Wait for network idle after reload
+        await this.page.waitForTimeout(2000);
+        
+        // More specific button selector
+        const button = await this.page.waitForSelector(
+            'button:has-text("Approve Request"):not([disabled])',
+            { state: 'attached', timeout: 5000 }
+        ).catch(() => null);
+        
+        if (!button) return false;
+        
+        // Check if button is both visible and enabled
+        const isVisible = await button.isVisible();
+        const isEnabled = await button.isEnabled();
+        const processingText = await this.page.$('text="Request is being Processed"')
+            .then(elem => elem !== null)
+            .catch(() => false);
+        
+        return isVisible && isEnabled && !processingText;
     };
+
     const pollForElement = async (checkFn, timeout = 180000, interval = 10000) => {
       const startTime = Date.now();
+      let lastError = null;
       
       while (Date.now() - startTime < timeout) {
           try {
               const result = await checkFn();
               if (result) return true;
-              await this.page.waitForTimeout(10000);
+              
+              await this.page.waitForTimeout(interval);
           } catch (error) {
-              await this.page.waitForTimeout(10000);
+              lastError = error;
+              await this.page.waitForTimeout(interval);
           }
       }
-      throw new Error(`Approver button not found after ${timeout/1000} seconds`);
-    };
+      
+      throw new Error(`Approver button not found after ${timeout/1000} seconds. Last error: ${lastError?.message || 'None'}`);
+  };
+
     try {
       const buttonFound = await pollForElement(isApproverButtonVisible, 180000, 10000);
       expect(buttonFound).toBe(true);
-      await this.page.locator(this.clickToApprove).click();
-      await this.page.getByPlaceholder('Please add a message').click();
-      await this.page.getByPlaceholder('Please add a message').fill('test');
-      await this.page.getByRole('button', { name: 'Approve Request' }).click();
+      const clickApproveButton = async (maxAttempts = 3) => {
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                await this.page.locator(this.clickToApprove).waitFor({ state: 'visible', timeout: 5000 });
+                await this.page.locator(this.clickToApprove).click({ timeout: 5000 });
+                await this.page.getByPlaceholder('Please add a message').click();
+                await this.page.getByPlaceholder('Please add a message').fill('test');
+                await this.page.getByRole('button', { name: 'Approve Request' }).click();
+                break;
+            } catch (error) {
+                if (attempt === maxAttempts) throw error;
+                await this.page.waitForTimeout(2000);
+            }
+        }
+    };
+    
+    await clickApproveButton();
 
       // Complete Request
       await this.page.getByRole('button', { name: 'Mark as complete' }).click();
