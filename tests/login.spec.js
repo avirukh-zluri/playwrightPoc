@@ -45,11 +45,15 @@ test('Contract with License without custom fields', async ( {page} ) => {
         basePrice:"0",
         oneTimeFee:"0",
         licenseName:"Pro",
+        licenseNameUsageBased:"Pro 1",
         cost:"1000",
         tenure:"months",
         discount:"0",
         descriptionLicense:"Demo",
-        quantity:"1000"
+        quantity:"1000",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 });
 
@@ -76,7 +80,11 @@ test('Contract with License with custom fields', async ( {page} ) => {
         quantity:"1000",
         CF1:"aaa",
         CF_APP:"Asana",
-        CF_USER:"POD4"
+        CF_USER:"POD4",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 });
 
@@ -151,7 +159,165 @@ test('Contract without License without custom fields but with Renewal Validation
         console.error('Test failed:', error.message);
         throw error;
     }
+});
+test("Contrat with New Application" , async( {page} ) => {
+    test.setTimeout(360000);
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomAppName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createContract({
+        newName:randomString,
+        newAppName:randomAppName,
+        appOwner:"POD4",
+        category:"Marketing Lead Scoring",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+    });
+
 })
+
+test("Contract with new Vendor" , async ( {page} ) => {
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    const randomVendorName ='TestVendor_' + Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createContract({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        newVendorName:randomVendorName,
+        vendorOwner : "POD4",
+        websiteName:`www.${randomName}.com`,
+        vendorContactName:randomName,
+        jobTitle:"Marketing Manager",
+        vendorContactEmail:`${randomName}@gmail.com`,
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+    });
+});
+
+test('Contract with no Application' , async ({page}) => {
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.goToLicenses();
+    await license.createContractWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+    });
+});
+
+test('Contract Creation from Vendor' , async ( {page} ) => {
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+
+    // Go to vendor
+    await license.navigateVendors();
+    await page.getByPlaceholder('Search').click();
+    await page.getByPlaceholder('Search').fill('notion');
+    await page.getByRole('cell', { name: 'notion' }).locator('div').click();
+    await page.getByRole('link', { name: 'Contracts' }).click();
+    await page.locator('div').filter({ hasText: /^\+ Add$/ }).nth(1).click();
+    await page.locator('[id="\\30 "]').click(); // Click On Contract 
+
+    // Contract
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.createContractWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        subscriptionFromVendor:true,
+    });
+});
+
+test('Contract renewing with existing contract With new data' , async ( {page} ) => {
+    test.setTimeout(120000);
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.renewContractWithExistingContract({
+        oldContractName:"Test_08dyq",
+        newData:true,
+        newName:randomString,
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test('Contract renewing with existing contract  with existing data' , async ( {page} ) => {
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.renewContractWithExistingContract({
+        oldContractName:"Test_08dyq",
+        newData:false,
+        newName:randomString,
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4"
+    });
+});
+
+test('Contract mapping in the License Table' , async ( { page } ) => {
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomLicenseName = 'Pro_' + Math.random().toString(36).substring(2, 7);
+    await license.createContract({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        // vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        basePrice:"0",
+        oneTimeFee:"0",
+        licenseName:randomLicenseName,
+        cost:"1000",
+        tenure:"months",
+        discount:"0",
+        descriptionLicense:"Demo",
+        quantity:"1000",
+        CF1:"aaa",
+        CF_APP:"Asana",
+        CF_USER:"POD4",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:false,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
+    });
+
+    await page.getByRole('button', { name: 'Applications Applications' }).click();
+    await page.getByRole('link', { name: 'All Apps' }).click();
+    await page.getByPlaceholder('Search').click();
+    await page.getByPlaceholder('Search').fill('Asana');
+    await page.getByPlaceholder('Search').press('Enter');
+    await page.getByRole('cell', { name: 'Asana' }).click();
+    await page.getByRole('link', { name: 'Licenses' }).click();
+    await page.getByPlaceholder('Search Licenses').click();
+    await page.getByPlaceholder('Search Licenses').fill(randomLicenseName);
+    const expectedLicenseNameawait = await page.locator("(//div[@class='d-flex align-items-center'])[1]").textContent();
+    expect(randomLicenseName).toEqual(expectedLicenseNameawait);
+
+});
 
 test("Application " , async  ( {page} ) => {
     const application = new Application(page);
@@ -362,7 +528,11 @@ test("Subscription with License with Custom Fields" , async ({page}) => {
         quantity:"1000",
         CF1:"aaa",
         CF_APP:"Asana",
-        CF_USER:"POD4"
+        CF_USER:"POD4",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 });
 
@@ -390,7 +560,11 @@ test("Subscription with License without Custom Fields" , async ({page}) => {
         tenure:"months",
         discount:"0",
         descriptionLicense:"Demo",
-        quantity:"1000"
+        quantity:"1000",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 });
 test("Subscription without License with custom feilds" , async ({page}) => {
@@ -454,7 +628,100 @@ test("Subscription without License without custom feilds but with vendor Validat
     });
 });
 
-  test("Renewals", async ({page}) => {
+test("Subscription with New Application" , async( {page} ) => {
+    test.setTimeout(120000);
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomAppName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createSubscription({
+        newName:randomString,
+        newAppName:randomAppName,
+        appOwner:"POD4",
+        category:"Marketing Lead Scoring",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
+});
+
+test("Subscription with new Vendor" , async ( {page} ) => {
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    const randomVendorName ='TestVendor_' + Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createSubscription({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        newVendorName:randomVendorName,
+        vendorOwner : "POD4",
+        websiteName:`www.${randomName}.com`,
+        vendorContactName:randomName,
+        jobTitle:"Marketing Manager",
+        vendorContactEmail:`${randomName}@gmail.com`,
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
+});
+
+test("Subscription with No Applciation" , async ( {page} ) => {
+    const pageLicenses = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Go to Licenses
+    await pageLicenses.goToLicenses();
+    // Create Subscription
+    await pageLicenses.createSubscriptionWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years"
+    });
+});
+
+test('Subscription Creation from Vendor' , async ( {page} ) => {
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+
+    // Go to vendor
+    await license.navigateVendors();
+    await page.getByPlaceholder('Search').click();
+    await page.getByPlaceholder('Search').fill('notion');
+    await page.getByRole('cell', { name: 'notion' }).locator('div').click();
+    await page.getByRole('link', { name: 'Contracts' }).click();
+    await page.locator('div').filter({ hasText: /^\+ Add$/ }).nth(1).click();
+    await page.locator('[id="\\31 "]').click(); // Click On Subscription
+
+    // Contract
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.createSubscriptionWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        renewalTermValue: "5" ,
+        renewalTerm:"Years",
+        subscriptionFromVendor:true
+    });
+
+});
+
+test("Renewals", async ({page}) => {
         await page.locator("//button[@class='sidebar__item btn btn-primary']//span[contains(text(),'Licenses')]").click();
         await page.locator("//span[normalize-space()='Renewals']").click();
 
@@ -1021,7 +1288,11 @@ test("Perpetual With License with custom fields" , async({page}) => {
         quantity:"1000",
         CF1:"aaa",
         CF_APP:"Asana",
-        CF_USER:"POD4"
+        CF_USER:"POD4",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 
 });
@@ -1047,7 +1318,11 @@ test("Perpetual With License without custom fields" , async({page}) => {
         cost:"1000",
         discount:"0",
         descriptionLicense:"Demo",
-        quantity:"1000"
+        quantity:"1000",
+        licenseNameUsageBased:"Pro 1",
+        usageBased:true,
+        quantityUsageBased:"100",
+        costUsageBased:"100"
     });
 
 });
@@ -1102,6 +1377,92 @@ test("Perpetual Without License without custom fields but with vendor validation
         ItOwner:"Jocker",
         negotiationOwner:"Jocker"
     });
+});
+
+test("Perpetual with New Application" , async( {page} ) => {
+    test.setTimeout(120000);
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomAppName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createPerpetuals({
+        newName:randomString,
+        newAppName:randomAppName,
+        appOwner:"POD4",
+        category:"Marketing Lead Scoring",
+        descName:"Demo",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
+    });
+});
+
+test("Perpetual with new Vendor" , async ( {page} ) => {
+    const license = new LicensePage(page);
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    const randomName = Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    const randomVendorName ='TestVendor_' + Math.random().toString(36).replace(/[0-9]/g,'').substring(2, 8);
+    await license.goToLicenses();
+    await license.createPerpetuals({
+        newName:randomString,
+        appName:"Asana",
+        descName:"Demo",
+        newVendorName:randomVendorName,
+        vendorOwner : "POD4",
+        websiteName:`www.${randomName}.com`,
+        vendorContactName:randomName,
+        jobTitle:"Marketing Manager",
+        vendorContactEmail:`${randomName}@gmail.com`,
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
+    });
+});
+
+test("Perpetual With No Application" , async ( {page} ) =>{
+    const pageLicenses = new LicensePage(page);
+    await pageLicenses.goToLicenses();
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    // Create Perpetuals
+    await pageLicenses.createPerpetualsWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker"
+    });
+});
+
+test('Perpetual Creation from Vendor' , async ( {page} ) => {
+    const license = new LicensePage(page);
+    await license.goToLicenses();
+
+    // Go to vendor
+    await license.navigateVendors();
+    await page.getByPlaceholder('Search').click();
+    await page.getByPlaceholder('Search').fill('notion');
+    await page.getByRole('cell', { name: 'notion' }).locator('div').click();
+    await page.getByRole('link', { name: 'Contracts' }).click();
+    await page.locator('div').filter({ hasText: /^\+ Add$/ }).nth(1).click();
+    await page.locator('[id="\\32 "]').click(); // Click On Subscription
+
+    // Contract
+    const randomString = 'Test_' + Math.random().toString(36).substring(2, 7);
+    await license.createPerpetualsWithNoApplication({
+        newName:randomString,
+        descName:"Demo",
+        vendorName:"Notion",
+        primaryOwner:"Jocker",
+        financeOwner:"Jocker",
+        ItOwner:"Jocker",
+        negotiationOwner:"Jocker",
+        perpetualFromVendor:true
+    });
+
 });
 
 test ("Optimization" , async ({page}) => {
