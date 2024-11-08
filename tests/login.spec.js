@@ -643,10 +643,7 @@ test("Subscription without License without custom feilds but with vendor Validat
         await expect(rightArrow, 'Right arrow should be enabled').toBeEnabled();
         await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
       }
-      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
-      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
-      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
-      await page.locator('div.table__info__text__right2.cursor-pointer img[src*="rightarrow"]').click();
+     
         //Filter-------------------------------------------------------------------------------------------
         //read initial count ->set filter ->read final count-try to delete the filter ->read the count
         //fltercout before
@@ -1116,12 +1113,11 @@ test ("Optimization" , async ({page}) => {
     //name validation
     const OptimizationHeadElement = await page.locator("//div[@class='NavH border-bottom']//div[@class='ins-1']");
     const text_optimization = await OptimizationHeadElement.textContent(); 
-    expect(text_optimization).toBe("Optimization Summary");
-    console.log(`Hey we are on ${text_optimization} page !!`);
+    expect(text_optimization).toBe("Optimization Summary",'Optimization page heading does not match');
+   
 
     //sub-heading validations
     const subhead1 = await page.locator('.optimization_summary_meta_title .font-14').textContent();
-    
     expect(subhead1) .toBe('Savings Opportunity', 
       'Header section should display "Savings Opportunity"');
   
@@ -1142,9 +1138,7 @@ test ("Optimization" , async ({page}) => {
 
 
       //refresh button validation 
-
     const refreshButton = page.locator('.optimization_summary_refresh_button');
-
     // Check if button is visible
     await expect(refreshButton).toBeVisible({
       timeout: 1000,
@@ -1159,26 +1153,24 @@ test ("Optimization" , async ({page}) => {
 
 
     //-----------------------------ON--PAGE----CURRENCY-----VALIDATION-----------------------------------------
-    async function checkSavingsElements(page) {
+        async function checkSavingsElements(page) {
         // Check the savings under review element
         const savingsUnderReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
         
         // Validate that it starts with '$'
-        if (savingsUnderReviewEle.startsWith('$')) {
-            console.log('Savings under review Header-element starts with $');
-        } else {
-            console.log('Savings under review Header-element does not start with $');
-        }
+        await expect(savingsUnderReviewEle).toMatch(/^\$/, {
+            message: "Savings under review Header-element should start with $"
+        });
+        
     
         // Check the estimated savings review element
         const estimatedSavingsReviewEle = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)").textContent();
         
         // Validate that it starts with '$'
-        if (estimatedSavingsReviewEle.startsWith('$')) {
-            console.log('Estimated savings review Header-element starts with $');
-        } else {
-            console.log('Estimated savings review Header-element does not start with $');
-        }
+        await expect(estimatedSavingsReviewEle).toMatch(/^\$/, {
+            message: "Estimated savings Header-element should start with $"
+        });
+        
     
         // Get all rows in the table
         const rows = await page.$$('tbody tr');
@@ -1187,19 +1179,16 @@ test ("Optimization" , async ({page}) => {
         for (const row of rows) {
             // Check if the value in the 3rd child starts with '$'
             const valueChild3 = await row.$eval('td:nth-child(3) div', div => div.innerText.trim());
-            if (valueChild3.startsWith('$')) {
-                console.log(`Savings under review cost for ROW-> ${row_number}, starts with $`);
-            } else {
-                console.log('Row child 3 does not start with $');
-            }
+            await expect(valueChild3).toMatch(/^\$/, {
+                message: `Expected Row ${row_number} value "${valueChild3}" to start with $ symbol`
+            });
+            
     
             // Check if the value in the 8th child starts with '$'
             const valueChild8 = await row.$eval('td:nth-child(8) div', div => div.innerText.trim());
-            if (valueChild8.startsWith('$')) {
-                console.log(`Estimated Realized Savings cosT for ROW-> ${row_number}, starts with $`);
-            } else {
-                console.log('Row child 8 does not start with $');
-            }
+            await expect(valueChild8).toMatch(/^\$/, {
+                message: `Expected Estimated Realized Savings cost for Row ${row_number} value "${valueChild8}" to start with $ symbol`
+            });
             row_number++;
         }
     }
@@ -1209,7 +1198,7 @@ test ("Optimization" , async ({page}) => {
 
 
     const savings_under_review_ele = await page.locator("body > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)").textContent();
-    console.log(savings_under_review_ele); // Example output: "$69.4"
+   // console.log(savings_under_review_ele); // Example output: "$69.4"
     
     // Function to convert savings based on its format
     function convertSavings(value) {
@@ -1233,7 +1222,7 @@ test ("Optimization" , async ({page}) => {
     }
     
     const savings = convertSavings(savings_under_review_ele);
-    console.log("header savings under review : ",savings);
+    //console.log("header savings under review : ",savings);
     
 
 
@@ -1241,7 +1230,7 @@ test ("Optimization" , async ({page}) => {
     const rows = await tableBodyLocator.locator('tr'); // Select all rows within the table body
     const rowCount = await rows.count(); // Get the number of rows
 
-    console.log(`Number of rows: ${rowCount}`);
+    //console.log(`Number of rows: ${rowCount}`);
 
     const headerRow = await page.$('//thead[@class="optimization_summary_table_head"]');
 if (headerRow) {
@@ -1249,11 +1238,9 @@ if (headerRow) {
     const columns = await headerRow.$$('th');
     
     // Check if the number of columns is 8
-    if (columns.length === 9) {
-        console.log('The header has 9 columns.');
-    } else {
-        console.log(`The header has ${columns.length} columns.`);
-    }
+    await expect(columns.length).toBe(9, {
+        message: `Expected header to have 9 columns but found ${columns.length} columns`
+    });
 } else {
     console.log('Header row not found.');
 }
@@ -1292,12 +1279,16 @@ if (headerRow) {
     let finalSum;
     if (totalSum >= 1000) {
     finalSum = totalSum / 1000; // Convert to millions
-    console.log(`Total sum of Estimate savings in millions: ${finalSum}`);
+    //console.log(`Total sum of Estimate savings in millions: ${finalSum}`);
     } else {
     finalSum = totalSum; // Keep it in thousands
-    console.log(`Total sum of Estimate savings in thousands: ${finalSum}k`);
+    //console.log(`Total sum of Estimate savings in thousands: ${finalSum}k`);
 }
-    
+    //assertion
+    // await expect(finalSum).toBe(savings, {
+    //     message: `Expected finalSum (${finalSum}) to match savings (${savings})`
+    //  });
+
     //validation
 
     function areEqualUpToOneDecimal(num1, num2) {
@@ -1305,8 +1296,9 @@ if (headerRow) {
     }
     
    // expect(savings.toFixed(2)).toBe(finalSum.toFixed(2));
-    console.log(areEqualUpToOneDecimal(finalSum, savings));  
-
+    //console.log(areEqualUpToOneDecimal(finalSum, savings)); 
+    expect(areEqualUpToOneDecimal(finalSum, savings), 
+    `Expected finalSum (${finalSum}) to match savings (${savings}) up to one decimal place`).toBeTruthy();
     //Estimated Savings Under review Calculation
 
     let totalSum_estimated_savings = 0;
@@ -1325,10 +1317,9 @@ if (headerRow) {
     let finalSum_estimated_savings;
     if (totalSum_estimated_savings >= 1000) {
     finalSum_estimated_savings = totalSum_estimated_savings / 1000; // Convert to millions
-    console.log(`Total sum of Estimate savings in millions: ${finalSum_estimated_savings}`);
+    
     } else {
     finalSum_estimated_savings = totalSum_estimated_savings; // Keep it in thousands
-    console.log(`Total sum of Estimate savings in thousands: ${finalSum_estimated_savings}k`);
     }
   
     //reading header _estimated_savings
@@ -1337,12 +1328,15 @@ if (headerRow) {
     
     const estimated_savings = parseFloat(estimated_savings_review_ele.replace(/[^\d.-]/g, ''));
    // const savings_under_review_num = parseInt(savings_under_review, 10);
-    console.log(estimated_savings);
+   // console.log(estimated_savings);
 
     function areEqualUpToOneDecimal(num1, num2) {
         return parseFloat(num1).toFixed(1) === parseFloat(num2).toFixed(1);
     }
-    console.log(areEqualUpToOneDecimal(finalSum_estimated_savings, estimated_savings));
+    //console.log(areEqualUpToOneDecimal(finalSum_estimated_savings, estimated_savings));
+    expect(areEqualUpToOneDecimal(finalSum_estimated_savings, estimated_savings), 
+   `Expected finalSum estimated savings (${finalSum_estimated_savings}) to match estimated savings (${estimated_savings}) up to one decimal place`).toBeTruthy();
+
 
     //function to click on i button and handle new page opening 
 
@@ -1358,15 +1352,12 @@ if (headerRow) {
 
     // Validate the heading on the new page
     const heading = await newPage.locator("//div[@class='container right']//h1[@class='fw-page-title']").textContent();
-    console.log(`Heading on new page: ${heading}`);
+    //console.log(`Heading on new page: ${heading}`);
 
     // Validate the heading
-    if (heading === expectedHeading) {
-        console.log(`After redirection from '${elementclicked}' -> to savings page!!, Heading is correct!`);
-        console.log(`Heading on new page: ${heading}`);
-    } else {
-        console.log('After redirection to savings page!!, Heading is incorrect!');
-    }
+    await expect(heading).toBe(expectedHeading, {
+        message: `After clicking "${elementclicked}", expected heading to be "${expectedHeading}" but found "${heading}"`
+     });
 
     // Optionally, you can close the new page if needed
     await newPage.close();
@@ -1386,17 +1377,10 @@ async function validateRowLinks(page) {
     for (const row of rows) {
         // Get the text from the specified locator
         const valueApp = await row.$eval('td:nth-child(2) div div div[style*="cursor: pointer"]', div => div.innerText.trim());
-        console.log(`Row ${rowNumber} app-name value: ${valueApp}`);
+       // console.log(`Row ${rowNumber} app-name value: ${valueApp}`);
 
         // Click on the text to open the new page by using a more specific locator within the row context
         await page.locator('div.d-flex div.optimization_summary_app_cell div:has-text("' + valueApp + '")').click();
-
-        //await page.waitForTimeout(1000);
-        // Read the text at the specified locator on the new page
-
-        // const currentUrl = page.url();
-        // const urlPattern = /^https:\/\/app\.zluri\.com\/applications\/[a-f0-9]+#optimization$/;
-        // await expect(currentUrl).toMatch(urlPattern,`URL ${currentUrl} doesn't match expected pattern`);
 
         const currentUrl = page.url();
     // Combined pattern using regex alternation (|) to match either URL format
@@ -1411,11 +1395,9 @@ async function validateRowLinks(page) {
         const breadcrumbText = await page.locator("//div[@class='ins-1']//nav//ol//li[1]//div[@class='truncate_breadcrumb_item_name']").textContent();
 
         // Validate with the previous page name
-        if (breadcrumbText.trim() === valueApp) {
-            console.log(`Validation successful for Row ${rowNumber}: '${breadcrumbText}' matches '${valueApp}'`);
-        } else {
-            console.log(`Validation failed for Row ${rowNumber}: '${breadcrumbText}' does not match '${valueApp}'`);
-        }
+        await expect.soft(breadcrumbText.trim()).toEqual(valueApp, {
+            message: `Row ${rowNumber}: Breadcrumb validation failed - Expected "${valueApp}" but found "${breadcrumbText.trim()}"`
+        });
         rowNumber++;
         await page.goBack();
         await page.waitForLoadState('load');            
@@ -1427,7 +1409,6 @@ async function validateRowLinks(page) {
 
 
     //validation fo the optimization license cost
-
     async function extractNumber(text) {
         // Handle dash '-' case
         if (text === '-') return 0;
@@ -1436,8 +1417,7 @@ async function validateRowLinks(page) {
     }
 
     async function validateColumnSums() {
-        
-            // Get all rows using the specific class
+           // Get all rows using the specific class
             const rows = await page.locator('tr.optimization_summary_table_body_row').all();
     
             for (let i = 0; i < rows.length; i++) {
@@ -1456,9 +1436,9 @@ async function validateRowLinks(page) {
     
                 // Calculate sum
                 const sumOf5And6 = col5Num + col6Num;
-                if(sumOf5And6 == col4Num){
-                    console.log(`Validation successful for ${appName} for obtimizable licenses`);
-                }
+                await expect(sumOf5And6).toBe(col4Num, {
+                    message: `${appName}: Expected optimizable licenses sum (${sumOf5And6}) to match column 4 value (${col4Num})`
+                 });
             }
     }
 
@@ -1504,7 +1484,7 @@ for (const mainRow of mainRows) {
         
         // Skip if not a valid number or zero
         if (isNaN(licenseCount) || licenseCount <= 0) {
-          console.log(`zero value (${licenseText})`);
+          //console.log(`zero value (${licenseText})`);
           continue;
         }
 
@@ -1516,7 +1496,7 @@ for (const mainRow of mainRows) {
         });
 
         if (isClickable) {
-          console.log(`Found clickable license count: ${licenseCount}`);
+          //console.log(`Found clickable license count: ${licenseCount}`);
           
           // Click the license number
           await licenseElement.click();
@@ -1528,7 +1508,10 @@ for (const mainRow of mainRows) {
             // Get and validate user count
             const userCountText = await page.locator('.d-flex.z_table_chips .mx-1').textContent();
             const userCount = parseInt(userCountText.match(/Showing (\d+) Users/)?.[1] || '0');
-            console.log(`Validated: Found ${userCount} users`);
+            //console.log(`Validated: Found ${userCount} users`);
+            await expect.soft(licenseCount).toEqual(userCount, {
+                message: `Validation failed: License count (${licenseCount}) does not match user count (${userCount})`
+            });
             
             // Navigate back
             await page.goBack();
@@ -1544,7 +1527,7 @@ for (const mainRow of mainRows) {
             }
           }
         } else {
-         console.log(`Skipping: Number ${licenseCount} is not clickable`);
+        // console.log(`Skipping: Number ${licenseCount} is not clickable`);
         }
       } catch (innerError) {
         console.error('Error processing inner row:', innerError);
@@ -1601,7 +1584,7 @@ for (const mainRow1 of mainRows1) {
         
         // Skip if not a valid number or zero
         if (isNaN(licenseCount1) || licenseCount1 <= 0) {
-          console.log(`zero value (${licenseText1})`);
+          //console.log(`zero value (${licenseText1})`);
           continue;
         }
 
@@ -1613,7 +1596,7 @@ for (const mainRow1 of mainRows1) {
         });
 
         if (isClickable1) {
-          console.log(`Found clickable license count: ${licenseCount1}`);
+          //console.log(`Found clickable license count: ${licenseCount1}`);
           
           // Click the license number
           await licenseElement1.click();
@@ -1625,7 +1608,10 @@ for (const mainRow1 of mainRows1) {
             // Get and validate user count
             const userCountText1 = await page.locator('.d-flex.z_table_chips .mx-1').textContent();
             const userCount1 = parseInt(userCountText1.match(/Showing (\d+) Users/)?.[1] || '0');
-            console.log(`Validated: Found ${userCount1} users`);
+            //console.log(`Validated: Found ${userCount1} users`);
+            await expect(licenseCount1).toBe(userCount1, {
+                message: `License count (${licenseCount1}) does not match user count (${userCount1})`
+             });
             
             // Navigate back
             await page.goBack();
@@ -1641,7 +1627,7 @@ for (const mainRow1 of mainRows1) {
             }
           }
         } else {
-         console.log(`Skipping: Number ${licenseCount1} is not clickable`);
+         //console.log(`Skipping: Number ${licenseCount1} is not clickable`);
         }
       } catch (innerError) {
         console.error('Error processing inner row:', innerError);
@@ -1651,7 +1637,7 @@ for (const mainRow1 of mainRows1) {
 
     // Close the dropdown
     await dropdownArrow1.click();
-    await page.waitForTimeout(500); // Small delay after closing
+   // await page.waitForTimeout(500); // Small delay after closing
 
   } catch (mainError) {
     console.error('Error processing main row:', mainError);
@@ -1662,9 +1648,9 @@ for (const mainRow1 of mainRows1) {
 }
 
 //call
-console.log("validation for the Undeprovisioned Licenses");
+//console.log("validation for the Undeprovisioned Licenses");
 await license_redirection_validation(4);
-console.log("validation for the Unused Licenses");
+//console.log("validation for the Unused Licenses");
 await license_redirection_validation(5);
 
 
